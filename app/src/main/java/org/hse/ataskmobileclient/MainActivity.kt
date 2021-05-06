@@ -46,8 +46,7 @@ class MainActivity : AppCompatActivity() {
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
         try {
             val account = completedTask.getResult(ApiException::class.java)!!
-            Log.i(TAG, "Singed in with Google! $account")
-            Log.i(TAG, account.idToken!!)
+            Log.i(TAG, "Singed in with Google! Name: ${account.givenName}, ID token: ${account.idToken}")
         } catch (e: ApiException) {
             Log.w(TAG, "signInResult:failed code=" + e.statusCode)
         }
