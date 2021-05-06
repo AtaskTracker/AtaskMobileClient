@@ -13,12 +13,12 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 
 
-class MainActivity : AppCompatActivity() {
+class SignInActivity : AppCompatActivity() {
     private lateinit var googleSignInClient: GoogleSignInClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_sign_in)
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.server_client_id))
