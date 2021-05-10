@@ -1,9 +1,9 @@
 name: build signed APK and Bundle
 
 on:
-  pull_request:
-    branches:
-      - 'main'
+  push:
+    tags:
+    - 'v*'
 
 env:
   KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -12,7 +12,6 @@ env:
 
 jobs:
   build_apk_aab:
-    if: startsWith(github.head_ref, 'release') == true
     name: Build release artifacts
     runs-on: ubuntu-20.04
     steps:
@@ -33,14 +32,36 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --stacktrace
           ./gradlew bundleRelease
-      - name: Upload signed APK
-        uses: actions/upload-artifact@v2
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: app-release.apk
-          path: app/build/outputs/apk/release/app-release.apk
-
-      - name: Upload AAB Bundle
-        uses: actions/upload-artifact@v2
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      
+      - name: Upload Release APK
+        id: upload-release-apk 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: app-release.aab
-          path: app/build/outputs/bundle/release/app-release.aab
+          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          asset_path: app/build/outputs/apk/release/app-release.apk
+          asset_name: app-release.apk
+          asset_content_type: application/apk
+      
+      - name: Upload Release Bundle
+        id: upload-release-bundle 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          asset_path: app/build/outputs/bundle/release/app-release.aab
+          asset_name: app-release.aab
+          asset_content_type: application/aab
