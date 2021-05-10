@@ -3,7 +3,7 @@ name: build signed APK and Bundle
 on:
   push:
     tags:
-    - 'release*'
+    - 'v*'
 
 env:
   KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
