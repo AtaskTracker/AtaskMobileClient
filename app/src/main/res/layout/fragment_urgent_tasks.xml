@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".UrgentTasks"
+    android:background="@color/light_gray">
+
+    <LinearLayout
+        style="@style/TaskGroup">
+
+        <TextView
+            style="@style/TaskGroupTitle"
+            android:text="Важно"
+            />
+
+        <CheckBox
+            style="@style/CheckBoxText"
+            android:text="Забраться на Эверест" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/TaskGroup">
+
+        <TextView
+            style="@style/TaskGroupTitle"
+            android:text="Срочно"
+            />
+
+        <CheckBox
+            style="@style/CheckBoxText"
+            android:text="Вынести мусор" />
+
+    </LinearLayout>
+
+</LinearLayout>

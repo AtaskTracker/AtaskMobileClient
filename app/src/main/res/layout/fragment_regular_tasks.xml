@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".RegularTasks"
+    android:background="@color/light_gray">
+
+    <LinearLayout
+        style="@style/TaskGroup">
+
+        <TextView
+            style="@style/TaskGroupTitle"
+            android:text="Сегодня, 11 мая 2021"
+            />
+
+        <CheckBox
+            style="@style/CheckBoxText"
+            android:text="Выгулять собаку" />
+
+        <CheckBox
+            style="@style/CheckBoxText"
+            android:checked="true"
+            android:text="Выгулять кошку" />
+
+        <CheckBox
+            style="@style/CheckBoxText"
+            android:checked="true"
+            android:text="Получить диплом о высшем образовании" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/TaskGroup">
+
+        <TextView
+            style="@style/TaskGroupTitle"
+            android:text="Завтра, 12 мая 2021"
+            />
+
+        <CheckBox
+            style="@style/CheckBoxText"
+            android:checked="true"
+            android:text="Выгулять вторую собаку" />
+
+    </LinearLayout>
+
+</LinearLayout>
