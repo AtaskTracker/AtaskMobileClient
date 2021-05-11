@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">AtaskMobileClient</string>
     <string name="server_client_id">954302622465-iruk7dibdhfpl7udjtstl056kaa1sv3e.apps.googleusercontent.com</string>
+    <string name="app_title">Планер задач</string>
+    <string name="authorization_availability">Авторизация через другие сервисы (не) появится позже...</string>
 </resources>
