@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?#FF6200EE>
+<resources>
+
+    <style name="TopHeading">
+        <item name="android:textSize">32sp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="HintText">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+</resources>
