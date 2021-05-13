@@ -15,6 +15,8 @@ class TaskAdapter(private var tasks : ArrayList<TaskListItem>,
                   private val onListItemClick: OnListItemClick)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    fun getTasks() = tasks
+
     fun setTasks(tasks: ArrayList<TaskListItem>){
         this.tasks = tasks
         this.notifyDataSetChanged()
@@ -99,7 +101,7 @@ class TasksHeaderViewHolder(
     }
 
     fun bind(tasksHeader: TasksHeader) {
-        tvTasksBlockName.text = tasksHeader.tasksBlockName
+        tvTasksBlockName.text = tasksHeader.tasksGroupName
     }
 }
 

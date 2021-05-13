@@ -1,3 +1,3 @@
 package org.hse.ataskmobileclient.models
 
-class TasksHeader(val tasksBlockName : String) : TaskListItem()
+class TasksHeader(val tasksGroupName : String) : TaskListItem()
