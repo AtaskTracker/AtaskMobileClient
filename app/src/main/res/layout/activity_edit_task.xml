@@ -14,8 +14,7 @@
         android:scrollbars="vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="@+id/btn_complete">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_margin="10dp"
@@ -42,6 +41,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <EditText
+            android:id="@+id/edittask_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Название задачи"
@@ -49,7 +49,7 @@
             android:textSize="30sp" />
 
         <EditText
-            android:id="@+id/et_task_description"
+            android:id="@+id/edittask_description"
             android:inputType="textMultiLine"
             android:minLines="8"
             android:maxLines="8"
@@ -80,6 +80,7 @@
             android:gravity="center">
 
             <TextView
+                android:id="@+id/edittask_duedate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Срок: 11 May 2021 20:51"
@@ -88,6 +89,7 @@
                 android:textSize="20sp" />
 
             <ImageView
+                android:id="@+id/edittask_datepicker"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_margin="5dp"

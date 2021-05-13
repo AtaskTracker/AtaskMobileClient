@@ -1,6 +1,12 @@
 package org.hse.ataskmobileclient.models
 
+import java.util.*
+
 class Task(
+        val id: UUID,
         val isCompleted : Boolean,
         val taskName : String,
+        val description : String,
+        val dueDate: Date?,
+        val members: List<TaskMember>,
 ) : TaskListItem()
