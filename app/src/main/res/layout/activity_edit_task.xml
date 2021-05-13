@@ -120,9 +120,19 @@
             android:gravity="center"
             android:layout_marginHorizontal="20dp">
 
-            <EditText
+<!--            <EditText-->
+<!--                style="@style/edittext_round_box"-->
+<!--                android:id="@+id/et_member_name"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_weight="1"-->
+<!--                android:background="@drawable/textinputborder"-->
+<!--                android:padding="10dp"-->
+<!--                android:hint="@string/taskinfo_hint_addmembers" />-->
+
+            <Spinner
                 style="@style/edittext_round_box"
-                android:id="@+id/et_member_name"
+                android:id="@+id/et_member_name_spinner"
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -130,9 +140,11 @@
                 android:padding="10dp"
                 android:hint="@string/taskinfo_hint_addmembers" />
 
+
             <ImageView
                 android:layout_width="30dp"
                 android:layout_height="30dp"
+                android:id="@+id/et_member_add"
                 android:src="@drawable/ic_taskinfo_plus"
                 android:layout_gravity="center"
                 android:layout_margin="10dp"/>
