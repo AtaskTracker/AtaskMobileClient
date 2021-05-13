@@ -11,9 +11,14 @@ import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.models.TaskListItem
 import org.hse.ataskmobileclient.models.TasksHeader
 
-class TaskAdapter(private val tasks : ArrayList<TaskListItem>,
+class TaskAdapter(private var tasks : ArrayList<TaskListItem>,
                   private val onListItemClick: OnListItemClick)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    fun setTasks(tasks: ArrayList<TaskListItem>){
+        this.tasks = tasks
+        this.notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val context = parent.context
@@ -70,7 +75,7 @@ class TaskViewHolder(
         private val onListItemClick: OnListItemClick)
     : RecyclerView.ViewHolder(itemView) {
 
-    private val cbTaskCompleted : CheckBox = itemView.findViewById(R.id.cb_task_completed)
+    private val cbTaskCompleted : CheckBox = itemView.findViewById(R.id.cb_task)
     private val tvTaskName : TextView = itemView.findViewById(R.id.tv_task_name)
 
     init {

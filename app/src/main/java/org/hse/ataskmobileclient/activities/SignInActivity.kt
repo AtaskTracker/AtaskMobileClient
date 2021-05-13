@@ -1,9 +1,8 @@
-package org.hse.ataskmobileclient
+package org.hse.ataskmobileclient.activities
 
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -13,7 +12,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
-import kotlin.math.sign
+import com.google.gson.Gson
+import org.hse.ataskmobileclient.R
 
 
 class SignInActivity : AppCompatActivity() {
@@ -90,9 +90,10 @@ class SignInActivity : AppCompatActivity() {
             TAG,
             "Singed in with Google! Name: ${account.givenName}, ID token: ${account.idToken}"
         )
+
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra(MainActivity.FULL_NAME_EXTRA, "${account.givenName} ${account.familyName}")
-            putExtra(MainActivity.PHOTO_URL_EXTRA, account.photoUrl)
+            putExtra(MainActivity.PHOTO_URL_EXTRA, account.photoUrl.toString())
         }
         startActivity(intent)
     }
