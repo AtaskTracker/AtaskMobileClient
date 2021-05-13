@@ -1,4 +1,4 @@
-package org.hse.ataskmobileclient
+package org.hse.ataskmobileclient.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/navigation_tasks_with_deadline"
+        android:icon="@drawable/ic_navigation_bar_clock"
+        android:title="Срочные" />
+
+    <item android:id="@+id/navigation_backlog_tasks"
+        android:icon="@drawable/ic_navigation_bar_backlog"
+        android:title="Постоянные" />
+</menu>

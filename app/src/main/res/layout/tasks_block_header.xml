@@ -6,11 +6,12 @@
 
     <TextView
         android:id="@+id/tv_tasks_block_name"
-        android:layout_width="wrap_content"
+        style="@style/TaskGroupTitle"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Сегодня, 23 февраля 2021"
-        android:textSize="20sp"
-        android:textColor="@color/black"
-        android:padding="10dp" />
+        android:text="Сегодня, 23 февраля 2021" />
+<!--        android:textSize="20sp"-->
+<!--        android:textColor="@color/black"-->
+<!--        android:padding="10dp" -->
 
 </LinearLayout>

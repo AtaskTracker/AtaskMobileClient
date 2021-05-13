@@ -58,4 +58,7 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:3.1.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
     implementation "io.ktor:ktor-client-core:1.5.4"
+    implementation 'com.github.bumptech.glide:glide:4.6.1'
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.android.support:design:27.0.2'
 }
