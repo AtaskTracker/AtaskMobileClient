@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -27,6 +28,35 @@ class EditTaskActivity : AppCompatActivity() {
     private lateinit var etTaskName: EditText
     private lateinit var tvTaskDueDate : TextView
     private lateinit var ivDatePicker : ImageView
+    private lateinit var btnChangeCompletedState : Button
+
+    private var completed : Boolean = false
+    set(value) {
+        field = value
+        if (field) {
+            btnChangeCompletedState.text = "Не сделано!"
+        }
+        else {
+            btnChangeCompletedState.text = "Сделано!"
+        }
+    }
+
+    private var dueDate : Date? = null
+    set(value) {
+        field = value
+        val dueDateString =
+            if (dueDate == null)
+            {
+                "Без срока"
+            }
+            else
+            {
+                val simpleDateFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+                "Срок: ${simpleDateFormat.format(dueDate!!)}"
+            }
+
+        tvTaskDueDate.text = dueDateString
+    }
 
     private lateinit var taskMembersAdapter : TaskMemberAdapter
     private var oldTask : Task? = null
@@ -40,19 +70,26 @@ class EditTaskActivity : AppCompatActivity() {
         etTaskDescription = findViewById(R.id.edittask_description)
         tvTaskDueDate = findViewById(R.id.edittask_duedate)
         ivDatePicker = findViewById(R.id.edittask_datepicker)
+        btnChangeCompletedState = findViewById(R.id.edittask_btn_changetaskcompleted)
+
+        btnChangeCompletedState.setOnClickListener {
+            completed = !completed
+        }
 
         val myCalendar = Calendar.getInstance()
-        val date =
+        val onDateSetListener =
             OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
                 myCalendar.set(Calendar.YEAR, year)
                 myCalendar.set(Calendar.MONTH, monthOfYear)
                 myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                dueDate = myCalendar.time
             }
 
         ivDatePicker.setOnClickListener {
             DatePickerDialog(
-                this@EditTaskActivity, date, myCalendar
-                    .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                this@EditTaskActivity, onDateSetListener,
+                myCalendar.get(Calendar.YEAR),
+                myCalendar.get(Calendar.MONTH),
                 myCalendar.get(Calendar.DAY_OF_MONTH)
             ).show()
         }
@@ -92,21 +129,10 @@ class EditTaskActivity : AppCompatActivity() {
     }
 
     private fun fillFieldsWithData(task: Task) {
-
-        val dueDateString =
-            if (task.dueDate == null)
-            {
-                "Без срока"
-            }
-            else
-            {
-                val simpleDateFormat = SimpleDateFormat("dd MMMM yyyy HH:mm", Locale.getDefault())
-                simpleDateFormat.format(task.dueDate)
-            }
-
+        dueDate = task.dueDate
         etTaskName.setText(task.taskName)
         etTaskDescription.setText(task.description)
-        tvTaskDueDate.text = dueDateString
+        completed = task.isCompleted
     }
 
     private fun finishEditing() {
@@ -115,10 +141,10 @@ class EditTaskActivity : AppCompatActivity() {
         val oldTask = oldTask!!
         val task = Task(
             oldTask.id,
-            false,
+            completed,
             taskName,
             taskDescription,
-            oldTask.dueDate,
+            dueDate,
             arrayListOf()
         )
         val taskJson = gson.toJson(task)
