@@ -13,6 +13,12 @@ class TaskMemberAdapter(
         private val onItemRemoveClick: OnItemRemoveClick)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>()
 {
+
+    public fun addMember(username: String) {
+        tasksMembers.add(TaskMember(username, "")) // TODO: add photo URL
+        this.notifyDataSetChanged();
+    }
+
     fun getMembers() = tasksMembers
 
     fun setMembers(members : ArrayList<TaskMember>) { this.tasksMembers = members }
@@ -39,10 +45,10 @@ class TaskMemberViewHolder(
     private val onItemRemoveClick : OnItemRemoveClick) : RecyclerView.ViewHolder(itemView) {
 
     private val tvMemberName : TextView = itemView.findViewById(R.id.tv_member_name)
+    private val ivMinusButton : TextView = itemView.findViewById(R.id.tv_member_remove)
 
     init {
-        //TODO достать "кнопку" удаления мембера и повесить обработчик на нее, а не на всю view
-        itemView.setOnClickListener { onItemRemoveClick.onClick(adapterPosition) }
+        ivMinusButton.setOnClickListener { onItemRemoveClick.onClick(adapterPosition) }
     }
 
     fun bind(taskMember: TaskMember) {

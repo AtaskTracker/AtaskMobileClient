@@ -28,6 +28,7 @@
         android:textColor="?attr/colorOnSecondary" />
 
     <ImageView
+        android:id="@+id/tv_member_remove"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:src="@drawable/ic_one_in_circle"

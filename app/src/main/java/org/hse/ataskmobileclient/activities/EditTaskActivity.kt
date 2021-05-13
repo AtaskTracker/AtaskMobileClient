@@ -5,9 +5,7 @@ import android.app.DatePickerDialog.OnDateSetListener
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -126,7 +124,27 @@ class EditTaskActivity : AppCompatActivity() {
         backButton.setOnClickListener {
             finishEditing()
         }
+
+        val addButton = findViewById<ImageView>(R.id.et_member_add)
+        addButton.setOnClickListener {
+            val spinner = findViewById<Spinner>(R.id.et_member_name_spinner);
+            val username = spinner.selectedItem.toString()
+            taskMembersAdapter.addMember(username);
+        }
+
+        initAddMembersSpinner()
     }
+
+       private fun initAddMembersSpinner() {
+           val memberOptions =
+               arrayOf("Владимир Путин", "Гордон Фриман", "Джуди Хоппс", "Павел Дуров")
+           val spinner = findViewById<Spinner>(R.id.et_member_name_spinner);
+           val adapter =
+               ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, memberOptions)
+           adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+           spinner.adapter = adapter
+       }
+
 
     private fun fillFieldsWithData(task: Task) {
         dueDate = task.dueDate
@@ -145,7 +163,7 @@ class EditTaskActivity : AppCompatActivity() {
             taskName,
             taskDescription,
             dueDate,
-            arrayListOf()
+            taskMembersAdapter.getMembers()
         )
         val taskJson = gson.toJson(task)
 
