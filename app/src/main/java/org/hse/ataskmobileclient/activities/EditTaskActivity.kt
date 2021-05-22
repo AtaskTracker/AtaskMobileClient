@@ -4,74 +4,48 @@ import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
+import org.hse.ataskmobileclient.MockData
 import org.hse.ataskmobileclient.R
+import org.hse.ataskmobileclient.databinding.ActivityEditTaskBinding
 import org.hse.ataskmobileclient.itemadapters.OnItemRemoveClick
-import org.hse.ataskmobileclient.itemadapters.TaskMemberAdapter
+import org.hse.ataskmobileclient.itemadapters.TaskMembersAdapter
 import org.hse.ataskmobileclient.models.Task
-import java.text.SimpleDateFormat
+import org.hse.ataskmobileclient.viewmodels.EditTaskViewModel
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class EditTaskActivity : AppCompatActivity() {
 
-    private lateinit var etTaskDescription: EditText
-    private lateinit var etTaskName: EditText
-    private lateinit var tvTaskDueDate : TextView
-    private lateinit var ivDatePicker : ImageView
-    private lateinit var btnChangeCompletedState : Button
+    private val viewModel by lazy { ViewModelProvider(this).get(EditTaskViewModel::class.java) }
 
-    private var completed : Boolean = false
-    set(value) {
-        field = value
-        if (field) {
-            btnChangeCompletedState.text = "Не сделано!"
-        }
-        else {
-            btnChangeCompletedState.text = "Сделано!"
-        }
+    private val binding : ActivityEditTaskBinding by lazy {
+        val binding : ActivityEditTaskBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_edit_task)
+
+        binding.lifecycleOwner = this@EditTaskActivity
+        binding.viewmodel = viewModel
+        binding
     }
 
-    private var dueDate : Date? = null
-    set(value) {
-        field = value
-        val dueDateString =
-            if (dueDate == null)
-            {
-                "Без срока"
-            }
-            else
-            {
-                val simpleDateFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
-                "Срок: ${simpleDateFormat.format(dueDate!!)}"
-            }
-
-        tvTaskDueDate.text = dueDateString
-    }
-
-    private lateinit var taskMembersAdapter : TaskMemberAdapter
+    private lateinit var taskMembersAdapter : TaskMembersAdapter
     private var oldTask : Task? = null
     private val gson = Gson()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit_task)
 
-        etTaskName = findViewById(R.id.edittask_name)
-        etTaskDescription = findViewById(R.id.edittask_description)
-        tvTaskDueDate = findViewById(R.id.edittask_duedate)
-        ivDatePicker = findViewById(R.id.edittask_datepicker)
-        btnChangeCompletedState = findViewById(R.id.edittask_btn_changetaskcompleted)
-
-        btnChangeCompletedState.setOnClickListener {
-            completed = !completed
+        val taskJson = intent.getStringExtra(TASK_JSON)
+        if (taskJson != null) {
+            oldTask = gson.fromJson(taskJson, Task::class.java)
+            binding.viewmodel!!.initializeFromTask(oldTask!!)
         }
 
         val myCalendar = Calendar.getInstance()
@@ -80,91 +54,67 @@ class EditTaskActivity : AppCompatActivity() {
                 myCalendar.set(Calendar.YEAR, year)
                 myCalendar.set(Calendar.MONTH, monthOfYear)
                 myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                dueDate = myCalendar.time
+                viewModel.dueDate.value = myCalendar.time
             }
 
-        ivDatePicker.setOnClickListener {
-            DatePickerDialog(
-                this@EditTaskActivity, onDateSetListener,
-                myCalendar.get(Calendar.YEAR),
-                myCalendar.get(Calendar.MONTH),
-                myCalendar.get(Calendar.DAY_OF_MONTH)
-            ).show()
-        }
+        viewModel.pickDateClickedEvent.observe(this,
+            {
+                val calendar = Calendar.getInstance()
+                if (viewModel.dueDate.value != null) {
+                    calendar.time = viewModel.dueDate.value!!
+                }
 
-        val taskJson = intent.getStringExtra(TASK_JSON)
-        if (taskJson != null) {
-            oldTask = gson.fromJson(taskJson, Task::class.java)
-            fillFieldsWithData(oldTask!!)
-        }
+                DatePickerDialog(
+                    this@EditTaskActivity, onDateSetListener,
+                    myCalendar.get(Calendar.YEAR),
+                    myCalendar.get(Calendar.MONTH),
+                    myCalendar.get(Calendar.DAY_OF_MONTH)
+                ).show()
+            })
 
-//        val members : ArrayList<TaskMember> = arrayListOf(
-//            TaskMember("Егор Карташов", true),
-//            TaskMember("Роман Салахов", true),
-//            TaskMember("Иван Иванов", true),
-//            TaskMember("Петр Петров", true),
-//            TaskMember("Сергей Сергеев", true),
-//        )
+        taskMembersAdapter = TaskMembersAdapter(
+            object : OnItemRemoveClick {
+                override fun onClick(position: Int) {
+                    viewModel.removeMemberAt(position)
+                }
+            })
 
-        val taskMembers = oldTask?.members ?: arrayListOf()
-
-        taskMembersAdapter = TaskMemberAdapter(ArrayList(taskMembers), object : OnItemRemoveClick {
-            override fun onClick(position: Int) {
-                val members = taskMembersAdapter.getMembers()
-                members.removeAt(position)
-                taskMembersAdapter.setMembers(members)
+        viewModel.members.observe(this, {
+            it?.let {
+                taskMembersAdapter.submitList(ArrayList(it))
             }
         })
-        val taskMembersList = findViewById<RecyclerView>(R.id.rv_task_members)
-        taskMembersList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
-        taskMembersList.layoutManager = LinearLayoutManager(this)
-        taskMembersList.adapter = taskMembersAdapter
 
-        val backButton = findViewById<ImageView>(R.id.back_button)
-        backButton.setOnClickListener {
-            finishEditing()
-        }
+        binding.taskMembersList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
+        binding.taskMembersList.adapter = taskMembersAdapter
 
-        val addButton = findViewById<ImageView>(R.id.et_member_add)
-        addButton.setOnClickListener {
-            val spinner = findViewById<Spinner>(R.id.et_member_name_spinner);
-            val username = spinner.selectedItem.toString()
-            taskMembersAdapter.addMember(username);
-        }
+        binding.backButton.setOnClickListener { finishEditing() }
 
         initAddMembersSpinner()
     }
 
-       private fun initAddMembersSpinner() {
-           val memberOptions =
-               arrayOf("Владимир Путин", "Гордон Фриман", "Джуди Хоппс", "Павел Дуров")
-           val spinner = findViewById<Spinner>(R.id.et_member_name_spinner);
-           val adapter =
-               ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, memberOptions)
-           adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-           spinner.adapter = adapter
-       }
+    private fun initAddMembersSpinner() {
+        val memberOptions = MockData.AvailableTaskMembers.map { it.username }
+        val adapter = ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item,
+            memberOptions)
 
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.etMemberNameSpinner.adapter = adapter
+        binding.etMemberNameSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                viewModel.selectedAccount = null
+            }
 
-    private fun fillFieldsWithData(task: Task) {
-        dueDate = task.dueDate
-        etTaskName.setText(task.taskName)
-        etTaskDescription.setText(task.description)
-        completed = task.isCompleted
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?,
+                                        position: Int, id: Long)
+            {
+                viewModel.selectedAccount = MockData.AvailableTaskMembers[position]
+            }
+        }
     }
 
     private fun finishEditing() {
-        val taskName = etTaskName.text.toString()
-        val taskDescription = etTaskDescription.text.toString()
-        val oldTask = oldTask!!
-        val task = Task(
-            oldTask.id,
-            completed,
-            taskName,
-            taskDescription,
-            dueDate,
-            taskMembersAdapter.getMembers()
-        )
+        val task = viewModel.getEditedTask()
         val taskJson = gson.toJson(task)
 
         val intent = Intent().apply {

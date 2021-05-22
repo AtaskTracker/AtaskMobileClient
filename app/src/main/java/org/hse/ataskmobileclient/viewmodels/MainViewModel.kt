@@ -1,26 +1,39 @@
 package org.hse.ataskmobileclient.viewmodels
 
-import android.app.DownloadManager
-import android.database.Cursor
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.telephony.mbms.DownloadRequest
 import android.widget.ImageView
-import android.widget.Toast
+import androidx.databinding.BindingAdapter
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bumptech.glide.Glide
-import io.ktor.client.*
-import io.ktor.client.request.*
 import kotlinx.coroutines.launch
+import org.hse.ataskmobileclient.models.Task
+import org.hse.ataskmobileclient.services.ITasksService
 
-class MainViewModel(private val downloadManager: DownloadManager)
+class MainViewModel(
+//    private val tasksService: ITasksService
+    )
     : ViewModel()
 {
-    fun loadProfilePicture(ivProfilePicture: ImageView, profilePhotoUrl : String) {
-        val downloadUri = Uri.parse(profilePhotoUrl)
-        Glide.with(ivProfilePicture).load(downloadUri).into(ivProfilePicture)
+    var deadlineTasks : MutableLiveData<ArrayList<Task>> = MutableLiveData()
+    var backlogTasks : MutableLiveData<ArrayList<Task>> = MutableLiveData()
+    var userName : String = ""
+    var photoUrl : String = ""
+
+    fun reloadTasks() {
+//        viewModelScope.launch {
+//            deadlineTasks.value = ArrayList(tasksService.getTasksForWeekAsync())
+//            backlogTasks.value = ArrayList(tasksService.getBacklogTasksAsync())
+//        }
+    }
+
+    companion object {
+        @JvmStatic
+        @BindingAdapter("imageUrl")
+        fun loadImage(view: ImageView, imageUrl: String?) {
+            if (imageUrl != null && imageUrl.isNotEmpty())
+                Glide.with(view.context).load(imageUrl).into(view)
+        }
     }
 }

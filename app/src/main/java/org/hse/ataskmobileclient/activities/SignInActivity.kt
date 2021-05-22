@@ -34,11 +34,6 @@ class SignInActivity : AppCompatActivity() {
         val loginButton = findViewById<SignInButton>(R.id.login_button)
         loginButton.setOnClickListener {
             googleSingIn()
-//            val intent = Intent(this, MainActivity::class.java).apply {
-//                putExtra(MainActivity.FULL_NAME_EXTRA, "TEST: Егор Карташов")
-//                putExtra(MainActivity.PHOTO_URL_EXTRA, "https://lh3.googleusercontent.com/ogw/ADGmqu9zEW6M_Bff44ge1-sguB_pnWl2zXiF8W39xcRL=s83-c-mo")
-//            }
-//            startActivity(intent)
         }
     }
 
@@ -54,10 +49,6 @@ class SignInActivity : AppCompatActivity() {
                     val signInAccount = task.getResult(ApiException::class.java)!!
                     loginWithAccount(signInAccount)
                 } catch (apiException: ApiException) {
-                    // You can get from apiException.getStatusCode() the detailed error code
-                    // e.g. GoogleSignInStatusCodes.SIGN_IN_REQUIRED means user needs to take
-                    // explicit action to finish sign-in;
-                    // Please refer to GoogleSignInStatusCodes Javadoc for details
                     Log.e(TAG, apiException.message ?: apiException.statusCode.toString())
 
                     val signInIntent = googleSignInClient.signInIntent
@@ -86,10 +77,7 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun loginWithAccount(account: GoogleSignInAccount) {
-        Log.i(
-            TAG,
-            "Singed in with Google! Name: ${account.givenName}, ID token: ${account.idToken}"
-        )
+        Log.i(TAG, "Singed in with Google!")
 
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra(MainActivity.FULL_NAME_EXTRA, "${account.givenName} ${account.familyName}")
