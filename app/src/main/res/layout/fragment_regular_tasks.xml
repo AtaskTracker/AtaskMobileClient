@@ -10,24 +10,24 @@
     <LinearLayout
         style="@style/TaskGroup">
 
-        <TextView
-            style="@style/TaskGroupTitle"
-            android:text="Сегодня, 11 мая 2021"
-            />
+<!--        <TextView-->
+<!--            style="@style/TaskGroupTitle"-->
+<!--            android:text="Сегодня, 11 мая 2021"-->
+<!--            />-->
 
-        <CheckBox
-            style="@style/CheckBoxText"
-            android:text="Выгулять собаку" />
+<!--        <CheckBox-->
+<!--            style="@style/CheckBoxText"-->
+<!--            android:text="Выгулять собаку" />-->
 
-        <CheckBox
-            style="@style/CheckBoxText"
-            android:checked="true"
-            android:text="Выгулять кошку" />
+<!--        <CheckBox-->
+<!--            style="@style/CheckBoxText"-->
+<!--            android:checked="true"-->
+<!--            android:text="Выгулять кошку" />-->
 
-        <CheckBox
-            style="@style/CheckBoxText"
-            android:checked="true"
-            android:text="Получить диплом о высшем образовании" />
+<!--        <CheckBox-->
+<!--            style="@style/CheckBoxText"-->
+<!--            android:checked="true"-->
+<!--            android:text="Получить диплом о высшем образовании" />-->
 
     </LinearLayout>
 
@@ -39,10 +39,10 @@
             android:text="Завтра, 12 мая 2021"
             />
 
-        <CheckBox
-            style="@style/CheckBoxText"
-            android:checked="true"
-            android:text="Выгулять вторую собаку" />
+<!--        <CheckBox-->
+<!--            style="@style/CheckBoxText"-->
+<!--            android:checked="true"-->
+<!--            android:text="Выгулять вторую собаку" />-->
 
     </LinearLayout>
 

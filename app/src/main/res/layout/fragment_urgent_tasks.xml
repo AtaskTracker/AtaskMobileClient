@@ -15,9 +15,9 @@
             android:text="Важно"
             />
 
-        <CheckBox
-            style="@style/CheckBoxText"
-            android:text="Забраться на Эверест" />
+<!--        <CheckBox-->
+<!--            style="@style/CheckBoxText"-->
+<!--            android:text="Забраться на Эверест" />-->
 
     </LinearLayout>
 
@@ -29,9 +29,9 @@
             android:text="Срочно"
             />
 
-        <CheckBox
-            style="@style/CheckBoxText"
-            android:text="Вынести мусор" />
+<!--        <CheckBox-->
+<!--            style="@style/CheckBoxText"-->
+<!--            android:text="Вынести мусор" />-->
 
     </LinearLayout>
 
