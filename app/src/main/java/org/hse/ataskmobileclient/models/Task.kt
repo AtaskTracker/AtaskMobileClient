@@ -9,4 +9,5 @@ class Task(
         val description : String,
         val dueDate: Date?,
         val members: List<TaskMember>,
+        val label: String?
 ) : TaskListItem()

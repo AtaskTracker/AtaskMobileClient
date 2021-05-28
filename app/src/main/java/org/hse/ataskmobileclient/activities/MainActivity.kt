@@ -8,7 +8,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.gson.Gson
 import org.hse.ataskmobileclient.MockData
 import org.hse.ataskmobileclient.R
@@ -37,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(findViewById(R.id.my_toolbar))
+        setSupportActionBar(binding.myToolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         tasksAdapter = TaskAdapter(MockData.DeadlineTasks, object : OnListItemClick {
@@ -54,25 +53,9 @@ class MainActivity : AppCompatActivity() {
 
         binding.tasksList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         binding.tasksList.adapter = tasksAdapter
-
-        val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-            val taskAdapter = binding.tasksList.adapter as TaskAdapter
-            when (item.itemId){
-                R.id.navigation_tasks_with_deadline -> {
-                    MockData.BacklogTasks = taskAdapter.getTasks()
-                    taskAdapter.setTasks(MockData.DeadlineTasks)
-                    return@OnNavigationItemSelectedListener true
-                }
-                R.id.navigation_backlog_tasks -> {
-                    MockData.DeadlineTasks = taskAdapter.getTasks()
-                    taskAdapter.setTasks(MockData.BacklogTasks)
-                    return@OnNavigationItemSelectedListener true
-                }
-            }
-            false
-        }
-
-        binding.navigationBar.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
+        viewModel.currentTasks.observe(this, {
+            tasksAdapter.setTasks(it)
+        })
 
         val photoUrlString = intent.getStringExtra(PHOTO_URL_EXTRA)!!
         val fullName = intent.getStringExtra(FULL_NAME_EXTRA)!!

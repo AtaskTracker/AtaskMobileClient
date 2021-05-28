@@ -88,6 +88,6 @@ class SignInActivity : AppCompatActivity() {
 
     companion object {
         const val RC_SIGN_IN = 777
-        const val TAG = "MainActivity"
+        const val TAG = "SignInActivity"
     }
 }

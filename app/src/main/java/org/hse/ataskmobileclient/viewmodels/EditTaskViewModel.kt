@@ -20,6 +20,7 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
     var dueDate : MutableLiveData<Date?> = MutableLiveData(null)
     var pickDateClickedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
     var selectedAccount : TaskMember? = null
+    private var label : String? = null
 
     val dueDateStr : LiveData<String> = Transformations.map(dueDate) { newDate ->
         if (newDate == null) {
@@ -49,6 +50,7 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
         dueDate.value = task.dueDate
         members.value!!.clear()
         members.value!!.addAll(task.members)
+        label = task.label
     }
 
     fun getEditedTask(): Task {
@@ -58,8 +60,8 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
             taskName,
             description,
             dueDate.value,
-            members.value!!
-        )
+            members.value!!,
+            label)
     }
 
     fun onPickDateClicked() = pickDateClickedEvent.call()
