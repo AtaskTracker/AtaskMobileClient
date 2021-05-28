@@ -88,7 +88,8 @@ class EditTaskActivity : AppCompatActivity() {
         binding.taskMembersList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         binding.taskMembersList.adapter = taskMembersAdapter
 
-        binding.backButton.setOnClickListener { finishEditing() }
+        binding.backButton.setOnClickListener { finishEditingWithoutSaving() }
+        binding.btnSave.setOnClickListener { finishEditingWithSaving() }
 
         initAddMembersSpinner()
     }
@@ -113,7 +114,12 @@ class EditTaskActivity : AppCompatActivity() {
         }
     }
 
-    private fun finishEditing() {
+    private fun finishEditingWithoutSaving() {
+        setResult(RESULT_CANCELED)
+        finish()
+    }
+
+    private fun finishEditingWithSaving() {
         val task = viewModel.getEditedTask()
         val taskJson = gson.toJson(task)
 
