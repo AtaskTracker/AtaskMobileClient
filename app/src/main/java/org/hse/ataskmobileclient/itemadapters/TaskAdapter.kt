@@ -101,7 +101,7 @@ class TasksHeaderViewHolder(
     }
 
     fun bind(tasksHeader: TasksHeader) {
-        tvTasksBlockName.text = tasksHeader.tasksGroupName
+        tvTasksBlockName.text = tasksHeader.headerString
     }
 }
 

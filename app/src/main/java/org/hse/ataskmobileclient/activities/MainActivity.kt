@@ -1,37 +1,43 @@
 package org.hse.ataskmobileclient.activities
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.gson.Gson
 import org.hse.ataskmobileclient.MockData
 import org.hse.ataskmobileclient.R
+import org.hse.ataskmobileclient.databinding.ActivityMainBinding
 import org.hse.ataskmobileclient.itemadapters.OnListItemClick
 import org.hse.ataskmobileclient.itemadapters.TaskAdapter
 import org.hse.ataskmobileclient.models.Task
+import org.hse.ataskmobileclient.viewmodels.MainViewModel
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var tasksAdapter: TaskAdapter
     private val gson = Gson()
 
+    private val viewModel by lazy { ViewModelProvider(this).get(MainViewModel::class.java) }
+
+    private val binding : ActivityMainBinding by lazy {
+        val binding : ActivityMainBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_main)
+
+        binding.lifecycleOwner = this@MainActivity
+        binding.viewModel = viewModel
+        binding
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(findViewById(R.id.my_toolbar))
+        setSupportActionBar(binding.myToolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
-
-        val bottomNavigation = findViewById<BottomNavigationView>(R.id.navigation_bar)
 
         tasksAdapter = TaskAdapter(MockData.DeadlineTasks, object : OnListItemClick {
             override fun onClick(view: View, position: Int) {
@@ -45,37 +51,18 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        val recyclerView = findViewById<RecyclerView>(R.id.rv_tasks_list)
-        recyclerView.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
+        binding.tasksList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
+        binding.tasksList.adapter = tasksAdapter
+        viewModel.currentTasks.observe(this, {
+            tasksAdapter.setTasks(it)
+        })
 
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
-        recyclerView.adapter = tasksAdapter
-        recyclerView.isNestedScrollingEnabled = false
-
-
-        val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-            when (item.itemId){
-                R.id.navigation_tasks_with_deadline -> {
-                    (recyclerView.adapter as TaskAdapter).setTasks(MockData.DeadlineTasks)
-                    return@OnNavigationItemSelectedListener true
-                }
-                R.id.navigation_backlog_tasks -> {
-                    (recyclerView.adapter as TaskAdapter).setTasks(MockData.BacklogTasks)
-                    return@OnNavigationItemSelectedListener true
-                }
-            }
-            false
-        }
-
-        bottomNavigation.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
-
-        val photoUrlString = intent.getStringExtra(PHOTO_URL_EXTRA)
+        val photoUrlString = intent.getStringExtra(PHOTO_URL_EXTRA)!!
         val fullName = intent.getStringExtra(FULL_NAME_EXTRA)!!
-        initAppBar(fullName, Uri.parse(photoUrlString))
+        viewModel.userName = fullName
+        viewModel.photoUrl = photoUrlString
 
-        val ivLogout = findViewById<ImageView>(R.id.iv_main_logout)
-        ivLogout.setOnClickListener { logout() }
+        binding.ivMainLogout.setOnClickListener { finish() }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -90,22 +77,13 @@ class MainActivity : AppCompatActivity() {
 
             val tasks = tasksAdapter.getTasks()
             val oldTaskPosition = tasks.indexOfFirst { taskListItem -> taskListItem is Task && taskListItem.id == editedTask.id }
-            tasks[oldTaskPosition] = editedTask
+            if (oldTaskPosition >= 0)
+                tasks[oldTaskPosition] = editedTask
+            else
+                tasks.add(editedTask)
+
             tasksAdapter.setTasks(tasks)
         }
-    }
-
-    private fun initAppBar(fullName: String, profilePhotoUri: Uri) {
-        val appbarUsername = findViewById<TextView>(R.id.appbar_username)
-        appbarUsername.text = fullName
-
-        val ivProfilePicture = findViewById<ImageView>(R.id.profile_picture)
-        Glide.with(ivProfilePicture).load(profilePhotoUri).into(ivProfilePicture)
-    }
-
-    private fun logout(){
-        Log.i(TAG, "Logout clicked")
-        finish()
     }
 
     companion object {
