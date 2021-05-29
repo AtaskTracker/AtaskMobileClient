@@ -25,24 +25,21 @@ class MockData {
                     "Выгулять собаку",
                     "Нужно выгулять собаку",
                     today,
-                    arrayListOf(),
-                    label = null),
+                    arrayListOf()),
                 Task(
                     UUID.fromString("123adfba-5b14-4b22-956e-15417298f0b5"),
                     false,
                     "Выгулять кошку",
                     "Нужно выгулять кошку",
                     today,
-                    arrayListOf(),
-                    label = null),
+                    arrayListOf()),
                 Task(
                     UUID.fromString("195db63b-4586-4a59-9a4c-d8d1180fb719"),
                     false,
                     "Сходить в магазин",
                     "Нужно сходить в магазин",
                     today,
-                    arrayListOf(),
-                    label = null),
+                    arrayListOf()),
                 DeadlineTasksHeader(tomorrow, "Завтра, 15 мая 2021"),
                 Task(
                     UUID.fromString("493fb710-a4ce-4415-8eba-3a5851009df7"),
@@ -50,16 +47,14 @@ class MockData {
                     "Снова выгулять собаку",
                     "Нужно выгулять собаку, но уже завтра",
                     tomorrow,
-                    arrayListOf(),
-                    label = null),
+                    arrayListOf()),
                 Task(
                     UUID.fromString("2773ced7-edc2-4779-b148-4a6373559d05"),
                     false,
                     "Снова выгулять кошку",
                     "Нужно выгулять кошку, но уже завтра",
                     tomorrow,
-                    arrayListOf(),
-                    label = null),
+                    arrayListOf()),
             )
         }
 

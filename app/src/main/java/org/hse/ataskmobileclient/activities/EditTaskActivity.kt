@@ -1,12 +1,18 @@
 package org.hse.ataskmobileclient.activities
 
+import android.Manifest
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -72,6 +78,10 @@ class EditTaskActivity : AppCompatActivity() {
                 ).show()
             })
 
+        viewModel.selectPictureClickedEvent.observe(this, {
+            requestPhoto()
+        })
+
         taskMembersAdapter = TaskMembersAdapter(
             object : OnItemRemoveClick {
                 override fun onClick(position: Int) {
@@ -88,9 +98,34 @@ class EditTaskActivity : AppCompatActivity() {
         binding.taskMembersList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         binding.taskMembersList.adapter = taskMembersAdapter
 
-        binding.backButton.setOnClickListener { finishEditing() }
+        binding.backButton.setOnClickListener { finishEditingWithoutSaving() }
+        binding.btnSave.setOnClickListener { finishEditingWithSaving() }
 
         initAddMembersSpinner()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
+                                            grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show()
+                val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+            }
+            else {
+                Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
+            val taskPicture = data?.extras?.get("data") as Bitmap
+            viewModel.taskPicture.value = taskPicture
+        }
     }
 
     private fun initAddMembersSpinner() {
@@ -113,7 +148,12 @@ class EditTaskActivity : AppCompatActivity() {
         }
     }
 
-    private fun finishEditing() {
+    private fun finishEditingWithoutSaving() {
+        setResult(RESULT_CANCELED)
+        finish()
+    }
+
+    private fun finishEditingWithSaving() {
         val task = viewModel.getEditedTask()
         val taskJson = gson.toJson(task)
 
@@ -125,8 +165,33 @@ class EditTaskActivity : AppCompatActivity() {
         finish()
     }
 
+    private fun requestPhoto() {
+        val permissionResult = ContextCompat.checkSelfPermission(this,
+            Manifest.permission.CAMERA)
+
+        if (permissionResult == PackageManager.PERMISSION_DENIED){
+            if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)){
+                Toast.makeText(this,
+                    "You need to grant access to camera to take a photo",
+                    Toast.LENGTH_LONG).show()
+            }
+
+            requestPermissions(arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_CODE)
+            return
+        }
+
+        if (permissionResult != PackageManager.PERMISSION_GRANTED)
+            return
+
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+    }
+
     companion object {
         const val TASK_JSON = "TASK_JSON"
         const val TASK_RESULT_JSON = "TASK_RESULT_JSON"
+        const val TAG = "EditTaskActivity"
+        const val CAMERA_PERMISSION_CODE = 1
+        const val REQUEST_IMAGE_CAPTURE = 2
     }
 }

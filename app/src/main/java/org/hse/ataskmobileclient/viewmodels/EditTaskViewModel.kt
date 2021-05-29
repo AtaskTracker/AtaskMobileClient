@@ -1,13 +1,18 @@
 package org.hse.ataskmobileclient.viewmodels
 
 import android.app.Application
-import android.view.View
+import android.graphics.Bitmap
+import android.widget.ImageView
+import androidx.databinding.BindingAdapter
 import androidx.lifecycle.*
+import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.SingleLiveEvent
 import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.models.TaskMember
+import org.hse.ataskmobileclient.services.BitmapConverter
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 class EditTaskViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -15,11 +20,16 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
 
     var taskName = ""
     var description = ""
-    var isCompleted : MutableLiveData<Boolean> = MutableLiveData(false)
     val members : MutableLiveData<ArrayList<TaskMember>> = MutableLiveData(arrayListOf())
     var dueDate : MutableLiveData<Date?> = MutableLiveData(null)
-    var pickDateClickedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
+    val pickDateClickedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
+    val selectPictureClickedEvent: SingleLiveEvent<Any> = SingleLiveEvent()
     var selectedAccount : TaskMember? = null
+    var taskPicture : MutableLiveData<Bitmap> = MutableLiveData(null)
+
+    val taskPictureSelected = Transformations.map(taskPicture) { it != null }
+
+    private var isCompleted : MutableLiveData<Boolean> = MutableLiveData(false)
     private var label : String? = null
 
     val dueDateStr : LiveData<String> = Transformations.map(dueDate) { newDate ->
@@ -29,13 +39,6 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
             val simpleDateFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
             "Срок: ${simpleDateFormat.format(newDate)}"
         }
-    }
-
-    val removeDueDateButtonVisible : LiveData<Int> = Transformations.map(dueDate) {
-        if (it != null)
-            View.VISIBLE
-        else
-            View.GONE
     }
 
     val isCompletedStateStr : LiveData<String>  = Transformations.map(isCompleted) { isCompleted ->
@@ -51,9 +54,17 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
         members.value!!.clear()
         members.value!!.addAll(task.members)
         label = task.label
+        taskPicture.value =
+            if (task.taskPictureBase64 == null) null
+            else BitmapConverter.fromBase64(task.taskPictureBase64)
     }
 
     fun getEditedTask(): Task {
+        val taskPictureBitmap = taskPicture.value
+        val taskPictureBase64 =
+            if (taskPictureBitmap == null) ""
+            else BitmapConverter.toBase64(taskPictureBitmap)
+
         return Task(
             id ?: UUID.randomUUID(),
             isCompleted.value!!,
@@ -61,14 +72,16 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
             description,
             dueDate.value,
             members.value!!,
-            label)
+            label,
+            taskPictureBase64)
     }
 
     fun onPickDateClicked() = pickDateClickedEvent.call()
 
     fun removeDueDate() { dueDate.value = null }
-
+    fun removeTaskPicture() { taskPicture.value = null }
     fun switchIsCompletedState() { isCompleted.value = !isCompleted.value!! }
+    fun selectTaskPicture() { selectPictureClickedEvent.call() }
 
     fun addSelectedMember() {
         if (selectedAccount != null) {
@@ -83,5 +96,16 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
 
         members.value!!.removeAt(position)
         members.value = members.value
+    }
+
+    companion object {
+        @JvmStatic
+        @BindingAdapter("imageBitmap")
+        fun setImageFromBitmap(imageView: ImageView, bitmap: Bitmap?) {
+            if (bitmap != null)
+                imageView.setImageBitmap(bitmap)
+            else
+                imageView.setImageResource(R.drawable.task_picture_placeholder)
+        }
     }
 }
