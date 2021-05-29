@@ -2,10 +2,14 @@
     <string name="app_name">AtaskMobileClient</string>
     <string name="server_client_id">954302622465-iruk7dibdhfpl7udjtstl056kaa1sv3e.apps.googleusercontent.com</string>
     <string name="app_title">Планер задач</string>
-    <string name="authorization_availability">Авторизация через другие сервисы (не) появится позже...</string>
+    <string name="authorization_availability">Авторизация через другие сервисы (не) появится позже…</string>
     <string name="urgent_tasks_tab">Срочные</string>
     <string name="regular_tasks_tab">Постоянные</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="taskinfo_hint_addmembers">Добавьте участников...</string>
+    <string name="taskinfo_hint_addmembers">Добавьте участников…</string>
+
+    <string name="action_take_photo">Сделать фото</string>
+    <string name="action_pick_photo_from_gallery">Выбрать из галереи</string>
+    <string name="title_pick_photo_for_task">Выберите изображение для задачи</string>
 </resources>
