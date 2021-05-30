@@ -12,4 +12,10 @@
     <string name="action_take_photo">Сделать фото</string>
     <string name="action_pick_photo_from_gallery">Выбрать из галереи</string>
     <string name="title_pick_photo_for_task">Выберите изображение для задачи</string>
+
+    <string name="overdue_tasks_header">Просрочено</string>
+    <string name="today_tasks_header">Сегодня</string>
+    <string name="tomorrow_tasks_header">Завтра</string>
+    <string name="upcoming_tasks_header">Предстоящие</string>
+
 </resources>

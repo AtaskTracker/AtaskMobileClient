@@ -7,20 +7,21 @@ import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.hse.ataskmobileclient.R
-import org.hse.ataskmobileclient.models.Task
-import org.hse.ataskmobileclient.models.TaskListItem
-import org.hse.ataskmobileclient.models.TasksHeader
+import org.hse.ataskmobileclient.dto.Task
+import org.hse.ataskmobileclient.viewmodels.TaskListItem
+import org.hse.ataskmobileclient.viewmodels.TasksHeader
 
-class TaskAdapter(private var tasks : ArrayList<TaskListItem>,
-                  private val onListItemClick: OnListItemClick)
-    : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    fun getTasks() = tasks
-
-    fun setTasks(tasks: ArrayList<TaskListItem>){
-        this.tasks = tasks
-        this.notifyDataSetChanged()
-    }
+class TasksAdapter(
+    tasks : ArrayList<TaskListItem>,
+    private val onListItemClick: (view : View, position: Int) -> Unit
+)
+    : RecyclerView.Adapter<RecyclerView.ViewHolder>()
+{
+    var tasks = tasks
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val context = parent.context
@@ -74,14 +75,14 @@ class TaskAdapter(private var tasks : ArrayList<TaskListItem>,
 
 class TaskViewHolder(
         itemView: View,
-        private val onListItemClick: OnListItemClick)
+        private val onListItemClick: (view : View, position: Int) -> Unit)
     : RecyclerView.ViewHolder(itemView) {
 
     private val cbTaskCompleted : CheckBox = itemView.findViewById(R.id.cb_task)
     private val tvTaskName : TextView = itemView.findViewById(R.id.tv_task_name)
 
     init {
-        itemView.setOnClickListener { onListItemClick.onClick(it, adapterPosition) }
+        itemView.setOnClickListener { onListItemClick(it, adapterPosition) }
     }
 
     fun bind(taskItem: Task) {
@@ -92,19 +93,16 @@ class TaskViewHolder(
 
 class TasksHeaderViewHolder(
         itemView: View,
-        private val onListItemClick: OnListItemClick) : RecyclerView.ViewHolder(itemView) {
-
+        private val onListItemClick: (view : View, position: Int) -> Unit)
+    : RecyclerView.ViewHolder(itemView)
+{
     private val tvTasksBlockName : TextView = itemView.findViewById(R.id.tv_tasks_block_name)
 
     init {
-        itemView.setOnClickListener { onListItemClick.onClick(it, adapterPosition) }
+        itemView.setOnClickListener { onListItemClick(it, adapterPosition) }
     }
 
     fun bind(tasksHeader: TasksHeader) {
         tvTasksBlockName.text = tasksHeader.headerString
     }
-}
-
-interface OnListItemClick {
-    fun onClick(view : View, position: Int)
 }

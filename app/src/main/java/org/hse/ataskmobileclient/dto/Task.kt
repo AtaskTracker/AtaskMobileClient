@@ -1,5 +1,6 @@
-package org.hse.ataskmobileclient.models
+package org.hse.ataskmobileclient.dto
 
+import org.hse.ataskmobileclient.viewmodels.TaskListItem
 import java.util.*
 
 class Task(

@@ -7,6 +7,7 @@
         <variable
             name="viewModel"
             type="org.hse.ataskmobileclient.viewmodels.MainViewModel" />
+        <import type="android.view.View" />
     </data>
 
     <LinearLayout
@@ -86,16 +87,34 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toTopOf="@id/navigation_bar"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+                app:layout_constraintEnd_toEndOf="parent" >
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/tasks_list"
+                    android:id="@+id/deadline_tasks_list"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    android:layout_margin="10dp"
+                    android:visibility="@{viewModel.isShowingDeadlineTasks ? View.VISIBLE : View.GONE}"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/backlog_tasks_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    android:visibility="@{viewModel.isShowingDeadlineTasks ? View.GONE : View.VISIBLE}"
                     android:layout_margin="10dp" />
 
             </FrameLayout>
+
+            <ImageView
+                android:id="@+id/btn_add_task"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
+                android:src="@drawable/ic_taskinfo_plus"
+                android:padding="10dp"
+                app:layout_constraintBottom_toTopOf="@id/navigation_bar"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <com.google.android.material.bottomnavigation.BottomNavigationView
                 android:id="@+id/navigation_bar"

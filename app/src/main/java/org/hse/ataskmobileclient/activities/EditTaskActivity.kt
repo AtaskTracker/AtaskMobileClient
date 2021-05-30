@@ -19,12 +19,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
+import org.hse.ataskmobileclient.EditTaskResult
+import org.hse.ataskmobileclient.EditTaskStatusCode
 import org.hse.ataskmobileclient.MockData
 import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.databinding.ActivityEditTaskBinding
 import org.hse.ataskmobileclient.itemadapters.OnItemRemoveClick
 import org.hse.ataskmobileclient.itemadapters.TaskMembersAdapter
-import org.hse.ataskmobileclient.models.Task
+import org.hse.ataskmobileclient.dto.Task
 import org.hse.ataskmobileclient.viewmodels.EditTaskViewModel
 import java.util.*
 
@@ -82,6 +84,8 @@ class EditTaskActivity : AppCompatActivity() {
         viewModel.selectPictureClickedEvent.observe(this, {
             requestTaskPhotoFromUser()
         })
+
+        binding.btnDeleteTask.setOnClickListener { askDeleteTaskConfirmation() }
 
         taskMembersAdapter = TaskMembersAdapter(
             object : OnItemRemoveClick {
@@ -218,6 +222,31 @@ class EditTaskActivity : AppCompatActivity() {
         startActivityForResult(pickPhotoFromGallery, REQUEST_PHOTO_FROM_STORAGE)
     }
 
+    private fun askDeleteTaskConfirmation() {
+        val confirmationDialog =
+            AlertDialog.Builder(this@EditTaskActivity)
+                .setMessage("Are you sure you want to delete current task?")
+                .setCancelable(false)
+                .setPositiveButton("Yes") { _, _ -> this.deleteTaskAndFinishActivity() }
+                .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+                .create()
+
+        confirmationDialog.show()
+    }
+
+    private fun deleteTaskAndFinishActivity() {
+        val oldTask = oldTask ?: throw UnknownError("oldTask was null, so delete action is not allowed")
+        val editTaskResult = EditTaskResult(EditTaskStatusCode.DELETE, oldTask)
+        val editTaskResultJson = gson.toJson(editTaskResult)
+
+        val intent = Intent().apply {
+            putExtra(EDIT_TASK_RESULT_JSON, editTaskResultJson)
+        }
+
+        setResult(RESULT_OK, intent)
+        finish()
+    }
+
     private fun finishEditingWithoutSaving() {
         setResult(RESULT_CANCELED)
         finish()
@@ -225,10 +254,16 @@ class EditTaskActivity : AppCompatActivity() {
 
     private fun saveResultsAndFinish() {
         val task = viewModel.getEditedTask()
-        val taskJson = gson.toJson(task)
+
+        val statusCode =
+            if (oldTask == null) EditTaskStatusCode.ADD
+            else EditTaskStatusCode.UPDATE
+
+        val editTaskResult = EditTaskResult(statusCode, task)
+        val editTaskResultJson = gson.toJson(editTaskResult)
 
         val intent = Intent().apply {
-            putExtra(TASK_RESULT_JSON, taskJson)
+            putExtra(EDIT_TASK_RESULT_JSON, editTaskResultJson)
 
         }
         setResult(RESULT_OK, intent)
@@ -237,7 +272,7 @@ class EditTaskActivity : AppCompatActivity() {
 
     companion object {
         const val TASK_JSON = "TASK_JSON"
-        const val TASK_RESULT_JSON = "TASK_RESULT_JSON"
+        const val EDIT_TASK_RESULT_JSON = "TASK_RESULT_JSON"
         const val TAG = "EditTaskActivity"
         const val CAMERA_PERMISSION_CODE = 1
         const val REQUEST_IMAGE_CAPTURE = 2

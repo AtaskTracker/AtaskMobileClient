@@ -1,6 +1,8 @@
 package org.hse.ataskmobileclient
 
-import org.hse.ataskmobileclient.models.*
+import org.hse.ataskmobileclient.dto.*
+import org.hse.ataskmobileclient.viewmodels.TaskListItem
+import org.hse.ataskmobileclient.viewmodels.TasksHeader
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -18,7 +20,7 @@ class MockData {
             val tomorrow = calendar.time
 
             return arrayListOf(
-                DeadlineTasksHeader(today, "Сегодня, 14 мая 2021"),
+                TasksHeader("Сегодня, 14 мая 2021"),
                 Task(
                     UUID.fromString("72b05ace-bda0-46e6-bb7b-5f7d213e7c79"),
                     false,
@@ -40,7 +42,7 @@ class MockData {
                     "Нужно сходить в магазин",
                     today,
                     arrayListOf()),
-                DeadlineTasksHeader(tomorrow, "Завтра, 15 мая 2021"),
+                TasksHeader("Завтра, 15 мая 2021"),
                 Task(
                     UUID.fromString("493fb710-a4ce-4415-8eba-3a5851009df7"),
                     false,
@@ -60,7 +62,7 @@ class MockData {
 
         private fun generateBacklogTasks() : ArrayList<TaskListItem> {
             return arrayListOf(
-                BacklogTasksHeader("Критичные"),
+                TasksHeader("Критичные"),
                 Task(
                     UUID.fromString("e67bc517-2933-43c2-b710-ed8913687a7e"),
                     true,
@@ -85,7 +87,7 @@ class MockData {
                     null,
                     arrayListOf(),
                     "Критичные"),
-                BacklogTasksHeader("Неважные"),
+                TasksHeader("Неважные"),
                 Task(
                     UUID.fromString("75849030-970f-4c33-9f1a-ace34d9300e4"),
                     false,

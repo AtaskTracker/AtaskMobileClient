@@ -1,4 +1,4 @@
-package org.hse.ataskmobileclient.models
+package org.hse.ataskmobileclient.dto
 
 import java.util.*
 
