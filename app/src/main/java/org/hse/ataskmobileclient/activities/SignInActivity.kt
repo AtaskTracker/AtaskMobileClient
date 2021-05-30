@@ -12,7 +12,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
-import com.google.gson.Gson
 import org.hse.ataskmobileclient.R
 
 
@@ -38,24 +37,28 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun googleSingIn(){
-        val task = googleSignInClient.silentSignIn()
-        if (task.isSuccessful){
-            val signInAccount = task.result!!
-            loginWithAccount(signInAccount)
-        }
-        else {
-            task.addOnCompleteListener { task ->
-                try {
-                    val signInAccount = task.getResult(ApiException::class.java)!!
-                    loginWithAccount(signInAccount)
-                } catch (apiException: ApiException) {
-                    Log.e(TAG, apiException.message ?: apiException.statusCode.toString())
 
-                    val signInIntent = googleSignInClient.signInIntent
-                    startActivityForResult(signInIntent, RC_SIGN_IN)
-                }
-            }
-        }
+        val signInIntent: Intent = googleSignInClient.signInIntent
+        startActivityForResult(signInIntent, RC_SIGN_IN)
+
+//        val task = googleSignInClient.silentSignIn()
+//        if (task.isSuccessful){
+//            val signInAccount = task.result!!
+//            loginWithAccount(signInAccount)
+//        }
+//        else {
+//            task.addOnCompleteListener { task ->
+//                try {
+//                    val signInAccount = task.getResult(ApiException::class.java)!!
+//                    loginWithAccount(signInAccount)
+//                } catch (apiException: ApiException) {
+//                    Log.e(TAG, apiException.message ?: apiException.statusCode.toString())
+//
+//                    val signInIntent = googleSignInClient.signInIntent
+//                    startActivityForResult(signInIntent, RC_SIGN_IN)
+//                }
+//            }
+//        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
