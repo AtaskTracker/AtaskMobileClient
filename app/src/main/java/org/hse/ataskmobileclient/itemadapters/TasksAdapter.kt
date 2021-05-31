@@ -80,6 +80,7 @@ class TaskViewHolder(
 
     private val cbTaskCompleted : CheckBox = itemView.findViewById(R.id.cb_task)
     private val tvTaskName : TextView = itemView.findViewById(R.id.tv_task_name)
+    private val tvTaskLabel : TextView = itemView.findViewById(R.id.tv_task_label)
 
     init {
         itemView.setOnClickListener { onListItemClick(it, adapterPosition) }
@@ -88,6 +89,7 @@ class TaskViewHolder(
     fun bind(taskItem: Task) {
         cbTaskCompleted.isChecked = taskItem.isCompleted
         tvTaskName.text = taskItem.taskName
+        tvTaskLabel.text = taskItem.label ?: ""
     }
 }
 

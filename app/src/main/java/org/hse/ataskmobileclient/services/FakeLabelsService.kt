@@ -5,7 +5,7 @@ class FakeLabelsService : ILabelsService {
         return listOf(
             "Критичные",
             "Важные",
-            "Неважные"
+            "Неважные",
         )
     }
 }
