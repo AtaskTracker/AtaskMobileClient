@@ -15,7 +15,7 @@ import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.services.FakeTasksService
 import org.hse.ataskmobileclient.services.ITasksService
-import org.hse.ataskmobileclient.services.TasksHelper
+import org.hse.ataskmobileclient.services.TasksGroupingUtil
 
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -25,11 +25,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val tasksService : ITasksService = FakeTasksService()
 
     val deadlineTasks = Transformations.map(ungroupedDeadlineTasks) {
-        TasksHelper.getGroupedDeadlineTasks(application, it)
+        TasksGroupingUtil.getGroupedDeadlineTasks(application, it)
     }
 
     val backlogTasks = Transformations.map(ungroupedBacklogTasks) {
-        TasksHelper.getGroupedBacklogTasks(application, it)
+        TasksGroupingUtil.getGroupedBacklogTasks(application, it)
     }
 
     val isShowingDeadlineTasks : MutableLiveData<Boolean> = MutableLiveData(true)
@@ -98,24 +98,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         this.ungroupedDeadlineTasks.value = deadlineTasks
         this.ungroupedBacklogTasks.value = backlogTasks
     }
-
-//    private fun addOrUpdateDeadlineTask(task: Task) {
-//        if (task.dueDate == null)
-//            return
-//
-//        val deadlineTasks = deadlineTasks.value ?: arrayListOf()
-//        val oldPositionInDeadlineTasks = deadlineTasks.indexOfFirst { (it as? Task)?.id == task.id }
-//
-//        if (oldPositionInDeadlineTasks >= 0){
-//            deadlineTasks[oldPositionInDeadlineTasks] = task
-//        }
-//        else {
-//            val taskHeaderPosition = deadlineTasks.indexOfFirst {
-//                it is DeadlineTasksHeader && it.startDate >= task.dueDate && it.endDate <= task.dueDate
-//            }
-//
-//        }
-//    }
 
     fun deleteTask(task: Task) {
         val deadlineTasks = this.ungroupedDeadlineTasks.value ?: arrayListOf()

@@ -9,8 +9,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-// Временный сервис, который будет удален в будущем. Помогает группировать задачи по дедлайну
-class TasksHelper {
+class TasksGroupingUtil {
 
     companion object {
         fun getGroupedDeadlineTasks(context : Context, ungroupedDeadlineTasks : ArrayList<Task>) : ArrayList<TaskListItem> {
