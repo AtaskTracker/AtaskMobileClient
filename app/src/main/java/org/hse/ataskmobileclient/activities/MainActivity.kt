@@ -2,6 +2,7 @@ package org.hse.ataskmobileclient.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -9,17 +10,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
-import org.hse.ataskmobileclient.MockData
+import org.hse.ataskmobileclient.EditTaskResult
+import org.hse.ataskmobileclient.EditTaskStatusCode
 import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.databinding.ActivityMainBinding
-import org.hse.ataskmobileclient.itemadapters.OnListItemClick
-import org.hse.ataskmobileclient.itemadapters.TaskAdapter
+import org.hse.ataskmobileclient.itemadapters.TasksAdapter
 import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.viewmodels.MainViewModel
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var tasksAdapter: TaskAdapter
     private val gson = Gson()
 
     private val viewModel by lazy { ViewModelProvider(this).get(MainViewModel::class.java) }
@@ -39,23 +39,19 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.myToolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        tasksAdapter = TaskAdapter(MockData.DeadlineTasks, object : OnListItemClick {
-            override fun onClick(view: View, position: Int) {
-                val tasks = tasksAdapter.getTasks()
-                val clickedTask = tasks[position]
-                val clickedTaskJson = gson.toJson(clickedTask)
-                val intent = Intent(view.context, EditTaskActivity::class.java).apply {
-                    putExtra(EditTaskActivity.TASK_JSON, clickedTaskJson)
-                }
-                startActivityForResult(intent, TASK_EDIT_CODE)
-            }
-        })
+        viewModel.reloadTasks()
 
-        binding.tasksList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
-        binding.tasksList.adapter = tasksAdapter
-        viewModel.currentTasks.observe(this, {
-            tasksAdapter.setTasks(it)
-        })
+        val deadlineTasks = viewModel.deadlineTasks.value ?: arrayListOf()
+        val deadlineTasksAdapter = TasksAdapter(deadlineTasks, this@MainActivity::openDeadlineTask)
+        viewModel.deadlineTasks.observe(this, { deadlineTasksAdapter.tasks = it })
+        binding.deadlineTasksList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
+        binding.deadlineTasksList.adapter = deadlineTasksAdapter
+
+        val backlogTasks = viewModel.backlogTasks.value ?: arrayListOf()
+        val backlogTasksAdapter = TasksAdapter(backlogTasks, this@MainActivity::openBacklogTask)
+        viewModel.backlogTasks.observe(this, { backlogTasksAdapter.tasks = it })
+        binding.backlogTasksList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
+        binding.backlogTasksList.adapter = backlogTasksAdapter
 
         val photoUrlString = intent.getStringExtra(PHOTO_URL_EXTRA)!!
         val fullName = intent.getStringExtra(FULL_NAME_EXTRA)!!
@@ -63,6 +59,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.photoUrl = photoUrlString
 
         binding.ivMainLogout.setOnClickListener { finish() }
+        binding.btnAddTask.setOnClickListener { openAddTaskScreen() }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -72,18 +69,46 @@ class MainActivity : AppCompatActivity() {
             if (resultCode != RESULT_OK || data == null)
                 return
 
-            val editedTaskJson = data.getStringExtra(EditTaskActivity.TASK_RESULT_JSON)
-            val editedTask = gson.fromJson(editedTaskJson, Task::class.java)
+            val editTaskResultJson = data.getStringExtra(EditTaskActivity.EDIT_TASK_RESULT_JSON)
+            val editTaskResult = gson.fromJson(editTaskResultJson, EditTaskResult::class.java)
+            val editedTask = editTaskResult.editedTask
 
-            val tasks = tasksAdapter.getTasks()
-            val oldTaskPosition = tasks.indexOfFirst { taskListItem -> taskListItem is Task && taskListItem.id == editedTask.id }
-            if (oldTaskPosition >= 0)
-                tasks[oldTaskPosition] = editedTask
-            else
-                tasks.add(editedTask)
-
-            tasksAdapter.setTasks(tasks)
+            when (editTaskResult.statusCode) {
+                EditTaskStatusCode.DELETE -> viewModel.deleteTask(editedTask)
+                EditTaskStatusCode.UPDATE -> viewModel.updateTask(editedTask)
+                EditTaskStatusCode.ADD -> viewModel.addTask(editedTask)
+            }
         }
+    }
+
+    private fun openDeadlineTask(view : View, taskPosition: Int) {
+        val clickedTask = viewModel.deadlineTasks.value!![taskPosition]
+        if (clickedTask !is Task)
+            return
+
+        openTaskForEditing(view, clickedTask)
+    }
+
+    private fun openBacklogTask(view : View, taskPosition: Int) {
+        val clickedTask = viewModel.backlogTasks.value!![taskPosition]
+        if (clickedTask !is Task)
+            return
+
+        openTaskForEditing(view, clickedTask)
+    }
+
+    private fun openTaskForEditing(view : View, task : Task) {
+        val taskJson = gson.toJson(task)
+        val intent = Intent(view.context, EditTaskActivity::class.java).apply {
+            putExtra(EditTaskActivity.TASK_JSON, taskJson)
+        }
+        startActivityForResult(intent, TASK_EDIT_CODE)
+    }
+
+    private fun openAddTaskScreen() {
+        Log.i(TAG, "========== Add task button clicked! ========")
+        val intent = Intent(this@MainActivity, EditTaskActivity::class.java)
+        startActivityForResult(intent, TASK_EDIT_CODE)
     }
 
     companion object {

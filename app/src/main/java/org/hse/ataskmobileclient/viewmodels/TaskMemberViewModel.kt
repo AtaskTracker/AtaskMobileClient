@@ -2,8 +2,6 @@ package org.hse.ataskmobileclient.viewmodels
 
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.bumptech.glide.Glide
 import org.hse.ataskmobileclient.models.TaskMember
 

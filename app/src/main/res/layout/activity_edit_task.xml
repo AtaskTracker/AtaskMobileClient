@@ -50,11 +50,13 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
+                    android:id="@+id/btn_delete_task"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:src="@drawable/ic_taskinfo_trashbin"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:visibility="@{viewmodel.id == null ? View.GONE : View.VISIBLE}" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -147,7 +149,7 @@
                             android:padding="10dp"
                             android:visibility="@{viewmodel.taskPictureSelected ? View.VISIBLE : View.GONE}"
                             android:src="@drawable/task_picture_placeholder"
-                            android:onClick="@{() -> viewmodel.selectTaskPicture()}"
+                            android:onClick="@{() -> viewmodel.onTaskPictureClicked()}"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
@@ -159,7 +161,7 @@
                             android:layout_height="50dp"
                             android:src="@drawable/task_picture_placeholder"
                             android:visibility="@{viewmodel.taskPictureSelected ? View.GONE : View.VISIBLE}"
-                            android:onClick="@{() -> viewmodel.selectTaskPicture()}"
+                            android:onClick="@{() -> viewmodel.onTaskPictureClicked()}"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />

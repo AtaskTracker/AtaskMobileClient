@@ -16,16 +16,18 @@ import java.util.*
 
 class EditTaskViewModel(application: Application) : AndroidViewModel(application) {
 
-    private var id: UUID? = null
+    var id: UUID? = null
+        private set
 
     var taskName = ""
     var description = ""
     val members : MutableLiveData<ArrayList<TaskMember>> = MutableLiveData(arrayListOf())
     var dueDate : MutableLiveData<Date?> = MutableLiveData(null)
-    val pickDateClickedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
-    val selectPictureClickedEvent: SingleLiveEvent<Any> = SingleLiveEvent()
     var selectedAccount : TaskMember? = null
     var taskPicture : MutableLiveData<Bitmap> = MutableLiveData(null)
+
+    val pickDateClickedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
+    val selectPictureClickedEvent: SingleLiveEvent<Any> = SingleLiveEvent()
 
     val taskPictureSelected = Transformations.map(taskPicture) { it != null }
 
@@ -62,7 +64,7 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
     fun getEditedTask(): Task {
         val taskPictureBitmap = taskPicture.value
         val taskPictureBase64 =
-            if (taskPictureBitmap == null) ""
+            if (taskPictureBitmap == null) null
             else BitmapConverter.toBase64(taskPictureBitmap)
 
         return Task(
@@ -81,7 +83,7 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
     fun removeDueDate() { dueDate.value = null }
     fun removeTaskPicture() { taskPicture.value = null }
     fun switchIsCompletedState() { isCompleted.value = !isCompleted.value!! }
-    fun selectTaskPicture() { selectPictureClickedEvent.call() }
+    fun onTaskPictureClicked() { selectPictureClickedEvent.call() }
 
     fun addSelectedMember() {
         if (selectedAccount != null) {
