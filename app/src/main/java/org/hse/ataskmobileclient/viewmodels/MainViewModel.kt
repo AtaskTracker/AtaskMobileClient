@@ -12,17 +12,23 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import org.hse.ataskmobileclient.R
+import org.hse.ataskmobileclient.SingleLiveEvent
 import org.hse.ataskmobileclient.models.Task
-import org.hse.ataskmobileclient.services.FakeTasksService
-import org.hse.ataskmobileclient.services.ITasksService
-import org.hse.ataskmobileclient.services.TasksGroupingUtil
+import org.hse.ataskmobileclient.services.*
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val ungroupedDeadlineTasks : MutableLiveData<ArrayList<Task>> = MutableLiveData(arrayListOf())
     private val ungroupedBacklogTasks : MutableLiveData<ArrayList<Task>> = MutableLiveData(arrayListOf())
+    private val filterStartTime : MutableLiveData<Date?> = MutableLiveData(null)
+    private val filterEndTime : MutableLiveData<Date?> = MutableLiveData(null)
+    private val filterLabel : MutableLiveData<String?> = MutableLiveData(null)
 
     private val tasksService : ITasksService = FakeTasksService()
+    private val labelsService : ILabelsService = FakeLabelsService()
 
     val deadlineTasks = Transformations.map(ungroupedDeadlineTasks) {
         TasksGroupingUtil.getGroupedDeadlineTasks(application, it)
@@ -33,9 +39,43 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     val isShowingDeadlineTasks : MutableLiveData<Boolean> = MutableLiveData(true)
+    val filterStartTimeString = Transformations.map(filterStartTime) {
+        val fromDateString = application.getString(R.string.from_date_filter)
+        val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+        val startTimeString =
+            if (it == null) application.getString(R.string.filter_not_set)
+            else sdf.format(it)
 
-    var userName : String = ""
+        "$fromDateString: $startTimeString"
+    }
+    val filterEndTimeString = Transformations.map(filterEndTime) {
+        val toDateString = application.getString(R.string.to_date_filter)
+        val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+        val endTimeString =
+            if (it == null) application.getString(R.string.filter_not_set)
+            else sdf.format(it)
+
+        "$toDateString: $endTimeString"
+    }
+    val filterLabelString = Transformations.map(filterLabel) {
+        val labelString = it ?: application.getString(R.string.filter_not_set)
+        val labelFilterString = application.getString(R.string.label_filter)
+
+        "$labelFilterString: $labelString"
+    }
+
     var photoUrl : String = ""
+    var userName : String = ""
+
+    val pickStartTimeClickedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
+    val pickEndTimeClickedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
+    val pickLabelClickedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
+
+    var availableLabels : List<String> = listOf()
+
+    fun pickStartTime() = pickStartTimeClickedEvent.call()
+    fun pickEndTime() = pickEndTimeClickedEvent.call()
+    fun pickLabel() = pickLabelClickedEvent.call()
 
     fun onNavigationItemSelected(item: MenuItem) : Boolean {
         when (item.itemId){
@@ -51,12 +91,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return false
     }
 
-    fun reloadTasks() {
+    fun reloadData() {
         viewModelScope.launch {
-            val allTasks = tasksService.getAllTasksAsync()
-            ungroupedDeadlineTasks.value = ArrayList(allTasks.filter { it.dueDate != null })
-            ungroupedBacklogTasks.value = ArrayList(allTasks.filter { it.dueDate == null })
+            reloadTasks()
+            availableLabels = labelsService.getAvailableLabelsAsync()
         }
+    }
+
+    private suspend fun reloadTasks() {
+        val allTasks = tasksService.getAllTasksAsync(filterStartTime.value,
+            filterEndTime.value, filterLabel.value)
+
+        ungroupedDeadlineTasks.value = ArrayList(allTasks.filter { it.dueDate != null })
+        ungroupedBacklogTasks.value = ArrayList(allTasks.filter { it.dueDate == null })
     }
 
     fun addTask(task: Task) {
@@ -113,6 +160,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         this.ungroupedDeadlineTasks.value = deadlineTasks
         this.ungroupedBacklogTasks.value = backlogTasks
+    }
+
+    fun setFilterStartTime(date: Date?) {
+        filterStartTime.value = date
+        viewModelScope.launch { reloadTasks() }
+    }
+
+    fun setFilterEndTime(date: Date?) {
+        filterEndTime.value = date
+        viewModelScope.launch { reloadTasks() }
+    }
+
+    fun setFilterLabel(label: String?) {
+        filterLabel.value = label
+        viewModelScope.launch { reloadTasks() }
     }
 
     companion object {

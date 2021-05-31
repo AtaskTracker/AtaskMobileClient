@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -14,6 +15,7 @@ import org.hse.ataskmobileclient.EditTaskResult
 import org.hse.ataskmobileclient.EditTaskStatusCode
 import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.databinding.ActivityMainBinding
+import org.hse.ataskmobileclient.fragments.DatePickerFragment
 import org.hse.ataskmobileclient.itemadapters.TasksAdapter
 import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.viewmodels.MainViewModel
@@ -39,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.myToolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        viewModel.reloadTasks()
+        viewModel.reloadData()
 
         val deadlineTasks = viewModel.deadlineTasks.value ?: arrayListOf()
         val deadlineTasksAdapter = TasksAdapter(deadlineTasks, this@MainActivity::openDeadlineTask)
@@ -60,6 +62,18 @@ class MainActivity : AppCompatActivity() {
 
         binding.ivMainLogout.setOnClickListener { finish() }
         binding.btnAddTask.setOnClickListener { openAddTaskScreen() }
+
+        viewModel.pickStartTimeClickedEvent.observe(this, {
+            openPickDateDialog(PICK_START_TIME_FILTER_CODE)
+        })
+
+        viewModel.pickEndTimeClickedEvent.observe(this, {
+            openPickDateDialog(PICK_END_TIME_FILTER_CODE)
+        })
+
+        viewModel.pickLabelClickedEvent.observe(this, {
+            pickLabelViaDialog()
+        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -111,11 +125,44 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, TASK_EDIT_CODE)
     }
 
+    private fun openPickDateDialog(dialogCode : Int) {
+        val fragment = DatePickerFragment {
+            when (dialogCode) {
+                PICK_START_TIME_FILTER_CODE -> viewModel.setFilterStartTime(it)
+                PICK_END_TIME_FILTER_CODE -> viewModel.setFilterEndTime(it)
+            }
+        }
+
+        fragment.show(supportFragmentManager, "datePicker")
+    }
+
+    private fun pickLabelViaDialog() {
+        val labels = arrayListOf("Не задано")
+            .apply { addAll(viewModel.availableLabels) }
+            .toTypedArray()
+
+        val dialog = AlertDialog.Builder(this@MainActivity)
+            .setTitle("Pick label")
+            .setItems(labels) { _, position ->
+                val pickedLabel =
+                    if (position == 0) null
+                    else labels.getOrNull(position)
+
+                viewModel.setFilterLabel(pickedLabel)
+            }
+            .create()
+
+        dialog.show()
+    }
+
     companion object {
         const val FULL_NAME_EXTRA = "Username"
         const val PHOTO_URL_EXTRA = "ProfilePictureUrl"
 
         private const val TAG = "MainActivity"
         private const val TASK_EDIT_CODE = 1
+        private const val PICK_START_TIME_FILTER_CODE = 2
+        private const val PICK_END_TIME_FILTER_CODE = 3
+        private const val PICK_LABEL_FILTER_CODE = 4
     }
 }

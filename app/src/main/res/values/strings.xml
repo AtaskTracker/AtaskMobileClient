@@ -18,4 +18,9 @@
     <string name="tomorrow_tasks_header">Завтра</string>
     <string name="upcoming_tasks_header">Предстоящие</string>
 
+    <string name="from_date_filter">От</string>
+    <string name="to_date_filter">По</string>
+    <string name="label_filter">Лейбл</string>
+    <string name="filter_not_set">Не задано</string>
+
 </resources>
