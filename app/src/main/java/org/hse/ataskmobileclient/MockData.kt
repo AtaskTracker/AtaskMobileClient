@@ -1,6 +1,6 @@
 package org.hse.ataskmobileclient
 
-import org.hse.ataskmobileclient.dto.*
+import org.hse.ataskmobileclient.models.*
 import org.hse.ataskmobileclient.viewmodels.TaskListItem
 import org.hse.ataskmobileclient.viewmodels.TasksHeader
 import java.util.*

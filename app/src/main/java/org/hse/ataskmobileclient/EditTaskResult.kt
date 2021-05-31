@@ -1,9 +1,9 @@
 package org.hse.ataskmobileclient
 
-import org.hse.ataskmobileclient.dto.Task
+import org.hse.ataskmobileclient.models.Task
 
 class EditTaskResult(
-    val statusCode: EditTaskStatusCode,
+    val statusCode : EditTaskStatusCode,
     val editedTask : Task
 )
 

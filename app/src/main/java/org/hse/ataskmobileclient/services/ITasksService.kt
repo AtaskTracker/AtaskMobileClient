@@ -1,6 +1,6 @@
 package org.hse.ataskmobileclient.services
 
-import org.hse.ataskmobileclient.dto.Task
+import org.hse.ataskmobileclient.models.Task
 
 interface ITasksService {
 

@@ -15,7 +15,7 @@ import org.hse.ataskmobileclient.EditTaskStatusCode
 import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.databinding.ActivityMainBinding
 import org.hse.ataskmobileclient.itemadapters.TasksAdapter
-import org.hse.ataskmobileclient.dto.Task
+import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.viewmodels.MainViewModel
 
 class MainActivity : AppCompatActivity() {

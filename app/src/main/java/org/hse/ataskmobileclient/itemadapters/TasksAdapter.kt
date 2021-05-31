@@ -7,7 +7,7 @@ import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.hse.ataskmobileclient.R
-import org.hse.ataskmobileclient.dto.Task
+import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.viewmodels.TaskListItem
 import org.hse.ataskmobileclient.viewmodels.TasksHeader
 

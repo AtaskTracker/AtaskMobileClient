@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.databinding.TaskMemberItemBinding
-import org.hse.ataskmobileclient.dto.TaskMember
+import org.hse.ataskmobileclient.models.TaskMember
 import org.hse.ataskmobileclient.viewmodels.TaskMemberViewModel
 
 class TaskMembersAdapter(

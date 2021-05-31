@@ -26,7 +26,7 @@ import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.databinding.ActivityEditTaskBinding
 import org.hse.ataskmobileclient.itemadapters.OnItemRemoveClick
 import org.hse.ataskmobileclient.itemadapters.TaskMembersAdapter
-import org.hse.ataskmobileclient.dto.Task
+import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.viewmodels.EditTaskViewModel
 import java.util.*
 

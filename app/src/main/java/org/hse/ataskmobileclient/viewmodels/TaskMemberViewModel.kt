@@ -3,7 +3,7 @@ package org.hse.ataskmobileclient.viewmodels
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
-import org.hse.ataskmobileclient.dto.TaskMember
+import org.hse.ataskmobileclient.models.TaskMember
 
 
 class TaskMemberViewModel(taskMember: TaskMember)

@@ -12,7 +12,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import org.hse.ataskmobileclient.R
-import org.hse.ataskmobileclient.dto.Task
+import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.services.FakeTasksService
 import org.hse.ataskmobileclient.services.ITasksService
 import org.hse.ataskmobileclient.services.TasksHelper

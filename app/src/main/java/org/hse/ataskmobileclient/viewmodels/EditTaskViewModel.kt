@@ -7,8 +7,8 @@ import androidx.databinding.BindingAdapter
 import androidx.lifecycle.*
 import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.SingleLiveEvent
-import org.hse.ataskmobileclient.dto.Task
-import org.hse.ataskmobileclient.dto.TaskMember
+import org.hse.ataskmobileclient.models.Task
+import org.hse.ataskmobileclient.models.TaskMember
 import org.hse.ataskmobileclient.services.BitmapConverter
 import java.text.SimpleDateFormat
 import java.util.*
