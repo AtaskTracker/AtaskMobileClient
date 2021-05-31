@@ -79,12 +79,62 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <GridLayout
+                android:id="@+id/filters_block"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="3"
+                android:rowCount="1"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" >
+
+                <TextView
+                    android:id="@+id/filter_start_time_str"
+                    android:text="@{viewModel.filterStartTimeString}"
+                    android:layout_column="0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="5dp"
+                    android:layout_columnWeight="1"
+                    android:gravity="center"
+                    android:onClick="@{() -> viewModel.pickStartTime()}"
+                    android:visibility="@{viewModel.isShowingDeadlineTasks ? View.VISIBLE : View.GONE}"
+                    tools:text="От: 21 мая 2021" />
+
+                <TextView
+                    android:id="@+id/filter_end_time_str"
+                    android:text="@{viewModel.filterEndTimeString}"
+                    android:layout_column="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="5dp"
+                    android:layout_columnWeight="1"
+                    android:gravity="center"
+                    android:onClick="@{() -> viewModel.pickEndTime()}"
+                    android:visibility="@{viewModel.isShowingDeadlineTasks ? View.VISIBLE : View.GONE}"
+                    tools:text="По: 22 мая 2021" />
+
+                <TextView
+                    android:id="@+id/filter_label"
+                    android:text="@{viewModel.filterLabelString}"
+                    android:layout_column="2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="5dp"
+                    android:layout_columnWeight="1"
+                    android:gravity="center"
+                    android:onClick="@{() -> viewModel.pickLabel()}"
+                    tools:text="Label: Критичные"/>
+
+            </GridLayout>
+
             <FrameLayout
                 android:id="@+id/container"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_alignBottom="@id/navigation_bar"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/filters_block"
                 app:layout_constraintBottom_toTopOf="@id/navigation_bar"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
