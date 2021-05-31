@@ -3,7 +3,6 @@ package org.hse.ataskmobileclient.activities
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -24,6 +23,7 @@ import org.hse.ataskmobileclient.EditTaskStatusCode
 import org.hse.ataskmobileclient.MockData
 import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.databinding.ActivityEditTaskBinding
+import org.hse.ataskmobileclient.fragments.DatePickerFragment
 import org.hse.ataskmobileclient.itemadapters.OnItemRemoveClick
 import org.hse.ataskmobileclient.itemadapters.TaskMembersAdapter
 import org.hse.ataskmobileclient.models.Task
@@ -57,29 +57,10 @@ class EditTaskActivity : AppCompatActivity() {
             binding.viewmodel!!.initializeFromTask(oldTask!!)
         }
 
-        val myCalendar = Calendar.getInstance()
-        val onDateSetListener =
-            OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
-                myCalendar.set(Calendar.YEAR, year)
-                myCalendar.set(Calendar.MONTH, monthOfYear)
-                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                viewModel.dueDate.value = myCalendar.time
-            }
-
-        viewModel.pickDateClickedEvent.observe(this,
-            {
-                val calendar = Calendar.getInstance()
-                if (viewModel.dueDate.value != null) {
-                    calendar.time = viewModel.dueDate.value!!
-                }
-
-                DatePickerDialog(
-                    this@EditTaskActivity, onDateSetListener,
-                    myCalendar.get(Calendar.YEAR),
-                    myCalendar.get(Calendar.MONTH),
-                    myCalendar.get(Calendar.DAY_OF_MONTH)
-                ).show()
-            })
+        viewModel.pickDateClickedEvent.observe(this, {
+            val datePickerFragment = DatePickerFragment { viewModel.dueDate.value = it }
+            datePickerFragment.show(supportFragmentManager, "datePicker")
+        })
 
         viewModel.selectPictureClickedEvent.observe(this, {
             requestTaskPhotoFromUser()
