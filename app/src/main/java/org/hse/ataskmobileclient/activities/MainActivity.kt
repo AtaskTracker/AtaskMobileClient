@@ -64,11 +64,11 @@ class MainActivity : AppCompatActivity() {
         binding.btnAddTask.setOnClickListener { openAddTaskScreen() }
 
         viewModel.pickStartTimeClickedEvent.observe(this, {
-            openPickDateDialog(PICK_START_TIME_FILTER_CODE)
+            pickDateViaDialog(PICK_START_TIME_FILTER_CODE)
         })
 
         viewModel.pickEndTimeClickedEvent.observe(this, {
-            openPickDateDialog(PICK_END_TIME_FILTER_CODE)
+            pickDateViaDialog(PICK_END_TIME_FILTER_CODE)
         })
 
         viewModel.pickLabelClickedEvent.observe(this, {
@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, TASK_EDIT_CODE)
     }
 
-    private fun openPickDateDialog(dialogCode : Int) {
+    private fun pickDateViaDialog(dialogCode : Int) {
         val fragment = DatePickerFragment {
             when (dialogCode) {
                 PICK_START_TIME_FILTER_CODE -> viewModel.setFilterStartTime(it)
@@ -163,6 +163,5 @@ class MainActivity : AppCompatActivity() {
         private const val TASK_EDIT_CODE = 1
         private const val PICK_START_TIME_FILTER_CODE = 2
         private const val PICK_END_TIME_FILTER_CODE = 3
-        private const val PICK_LABEL_FILTER_CODE = 4
     }
 }
