@@ -5,9 +5,9 @@
     <string name="authorization_availability">Авторизация через другие сервисы (не) появится позже…</string>
     <string name="urgent_tasks_tab">Срочные</string>
     <string name="regular_tasks_tab">Постоянные</string>
-    <!-- TODO: Remove or change this placeholder text -->
+    
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="taskinfo_hint_addmembers">Добавьте участников…</string>
+    <string name="taskinfo_hint_addmembers">Добавьте участника</string>
 
     <string name="action_take_photo">Сделать фото</string>
     <string name="action_pick_photo_from_gallery">Выбрать из галереи</string>
@@ -21,6 +21,23 @@
     <string name="from_date_filter">От</string>
     <string name="to_date_filter">По</string>
     <string name="label_filter">Лейбл</string>
-    <string name="filter_not_set">Не задано</string>
+    <string name="not_set">Не задано</string>
+    <string name="clear_label_filter">Очистить</string>
+
+    <string name="task_label_prefix">Лейбл</string>
+    <string name="new_task_label">Новый</string>
+    <string name="clear_task_label">Очистить</string>
+    <string name="cancel">Отмена</string>
+    <string name="choose_label_for_task">Выберите лейбл для задачи</string>
+    <string name="ok_option">ОК</string>
+    <string name="are_you_sure_you_want_to_delete_task">Вы уверены, что хотите удалить задачу?</string>
+    <string name="yes_option">Yes</string>
+    <string name="no_option">No</string>
+    <string name="need_to_grant_gallery_access">Вам нужно предоставить доступ к галерее, чтобы выбрать оттуда изображение</string>
+    <string name="need_to_grant_camera_access">Вам нужно предоставить доступ к камере, чтобы сделать фото</string>
+    <string name="user_already_added_to_task">Такой пользователь уже добавлен</string>
+    <string name="user_with_email_not_found">Пользователь не найден</string>
+    <string name="pick_label_for_filter">Выберите лейбл для фильтра</string>
+    <string name="clear_datetime">Очистить</string>
 
 </resources>

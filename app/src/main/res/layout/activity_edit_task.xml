@@ -8,235 +8,262 @@
             type="org.hse.ataskmobileclient.viewmodels.EditTaskViewModel" />
         <import type="android.view.View" />
     </data>
-    
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical"  >
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_margin="10dp"
-            android:orientation="vertical"
-            android:scrollbars="vertical"
-            app:layout_constraintBottom_toTopOf="@id/edittask_btn_changetaskcompleted"
-            app:layout_constraintEnd_toEndOf="parent"
+        <androidx.constraintlayout.widget.ConstraintLayout
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:context=".activities.EditTaskActivity">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/back_button"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:padding="5dp"
-                    android:src="@drawable/arrow_back"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ImageView
-                    android:id="@+id/btn_save"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:padding="5dp"
-                    android:src="@drawable/floppy_disk"
-                    app:layout_constraintStart_toEndOf="@id/back_button"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ImageView
-                    android:id="@+id/btn_delete_task"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@drawable/ic_taskinfo_trashbin"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:visibility="@{viewmodel.id == null ? View.GONE : View.VISIBLE}" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="0dp"
+                android:layout_margin="10dp"
+                android:orientation="vertical"
+                android:scrollbars="vertical"
+                app:layout_constraintBottom_toTopOf="@id/edittask_btn_changetaskcompleted"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:context=".activities.EditTaskActivity">
 
-                <EditText
-                    android:id="@+id/edittask_name"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:hint="Название задачи"
-                    android:textSize="30sp"
-                    android:text="@={viewmodel.taskName}"/>
+                    android:layout_margin="10dp"
+                    android:orientation="horizontal">
 
-            </LinearLayout>
+                    <ImageView
+                        android:id="@+id/back_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:padding="5dp"
+                        android:src="@drawable/arrow_back"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
+                    <ImageView
+                        android:id="@+id/btn_save"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:padding="5dp"
+                        android:src="@drawable/floppy_disk"
+                        app:layout_constraintStart_toEndOf="@id/back_button"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-            <EditText
-                android:id="@+id/edittask_description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/textinputborder"
-                android:gravity="top|start"
-                android:inputType="textMultiLine"
-                android:maxLines="8"
-                android:minLines="8"
-                android:padding="10dp"
-                android:scrollbars="vertical"
-                android:text="@={viewmodel.description}"
-                android:textColor="@color/gray"
-                android:textSize="18sp"
-                tools:text="Очень классное и длинное описание задачи, нужно обязательно прочитать его, прочитайте пожалуйста!" />
+                    <ImageView
+                        android:id="@+id/btn_delete_task"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:padding="5dp"
+                        android:src="@drawable/ic_taskinfo_trashbin"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:visibility="@{viewmodel.id == null ? View.GONE : View.VISIBLE}" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:orientation="horizontal">
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <TextView
-                    android:id="@+id/edittask_duedate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@{viewmodel.dueDateStr}"
-                    android:textColor="@color/gray"
-                    android:textSize="20sp"
-                    tools:text="Срок: 11 May 2021 20:51" />
-
-                <ImageView
-                    android:id="@+id/edittask_datepicker"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_margin="5dp"
-                    android:src="@drawable/ic_taskinfo_calendar"
-                    tools:src="@drawable/ic_taskinfo_calendar"
-                    android:onClick="@{() -> viewmodel.onPickDateClicked()}"/>
-
-                <ImageView
-                    android:id="@+id/edittask_removeduedate"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_margin="5dp"
-                    android:src="@drawable/ic_taskduedate_remove"
-                    android:visibility="@{viewmodel.dueDate != null ? View.VISIBLE : View.GONE}"
-                    android:onClick="@{() -> viewmodel.removeDueDate()}"/>
-
-            </LinearLayout>
-
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_height="wrap_content">
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
+                    <EditText
+                        android:id="@+id/edittask_name"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" >
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:hint="Название задачи"
+                        android:textSize="30sp"
+                        android:text="@={viewmodel.taskName}"/>
 
-                        <ImageView
-                            android:id="@+id/task_picture"
-                            android:layout_width="150dp"
-                            android:layout_height="150dp"
-                            android:padding="10dp"
-                            android:visibility="@{viewmodel.taskPictureSelected ? View.VISIBLE : View.GONE}"
-                            android:src="@drawable/task_picture_placeholder"
-                            android:onClick="@{() -> viewmodel.onTaskPictureClicked()}"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:imageBitmap="@{viewmodel.taskPicture}" />
+                </LinearLayout>
 
-                        <ImageView
-                            android:id="@+id/select_task_picture"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:src="@drawable/task_picture_placeholder"
-                            android:visibility="@{viewmodel.taskPictureSelected ? View.GONE : View.VISIBLE}"
-                            android:onClick="@{() -> viewmodel.onTaskPictureClicked()}"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
 
-                        <ImageView
-                            android:id="@+id/remove_task_picture"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            android:layout_margin="5dp"
-                            android:src="@drawable/ic_taskduedate_remove"
-                            android:visibility="@{viewmodel.taskPictureSelected ? View.VISIBLE : View.GONE}"
-                            android:onClick="@{() -> viewmodel.removeTaskPicture()}"
-                            app:layout_constraintStart_toEndOf="@id/task_picture"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent" />
+                <EditText
+                    android:id="@+id/edittask_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/textinputborder"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine"
+                    android:maxLines="5"
+                    android:minLines="5"
+                    android:padding="10dp"
+                    android:scrollbars="vertical"
+                    android:text="@={viewmodel.description}"
+                    android:textColor="@color/gray"
+                    android:textSize="18sp"
+                    tools:text="Очень классное и длинное описание задачи, нужно обязательно прочитать его, прочитайте пожалуйста!" />
 
-                    </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:id="@+id/task_label_string"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="10dp"
+                    android:textSize="18sp"
+                    android:text="@{viewmodel.taskLabelString}"
+                    tools:text="Лейбл: не задано"
+                    android:onClick="@{() -> viewmodel.onPickLabelClicked()}"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/edittask_duedate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@{viewmodel.dueDateStr}"
+                        android:textColor="@color/gray"
+                        android:textSize="18sp"
+                        tools:text="Срок: 11 May 2021 20:51" />
+
+                    <ImageView
+                        android:id="@+id/edittask_datepicker"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_margin="5dp"
+                        android:src="@drawable/ic_taskinfo_calendar"
+                        android:onClick="@{() -> viewmodel.onPickDateClicked()}"/>
+
+                </LinearLayout>
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="20dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
+                        android:orientation="vertical">
 
-                        <Spinner
-                            android:id="@+id/et_member_name_spinner"
-                            style="@style/memberspinner"
-                            android:layout_width="0dp"
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" >
+
+                            <ImageView
+                                android:id="@+id/task_picture"
+                                android:layout_width="150dp"
+                                android:layout_height="150dp"
+                                android:padding="10dp"
+                                android:visibility="@{viewmodel.isTaskPictureSelected ? View.VISIBLE : View.GONE}"
+                                android:src="@drawable/task_picture_placeholder"
+                                android:onClick="@{() -> viewmodel.onTaskPictureClicked()}"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:imageBitmap="@{viewmodel.taskPicture}"
+                                tools:visibility="gone"/>
+
+                            <ImageView
+                                android:id="@+id/select_task_picture"
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:src="@drawable/task_picture_placeholder"
+                                android:visibility="@{viewmodel.isTaskPictureSelected ? View.GONE : View.VISIBLE}"
+                                android:onClick="@{() -> viewmodel.onTaskPictureClicked()}"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:background="@drawable/textinputborder"
-                            android:hint="@string/taskinfo_hint_addmembers" />
+                            android:orientation="horizontal">
 
-                        <ImageView
-                            android:id="@+id/et_member_add"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            android:layout_gravity="center"
-                            android:layout_margin="10dp"
-                            android:src="@drawable/ic_taskinfo_plus"
-                            android:onClick="@{() -> viewmodel.addSelectedMember()}"/>
+                            <EditText
+                                android:id="@+id/new_member_email"
+                                style="@style/new_member_text_box"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginHorizontal="50dp"
+                                android:gravity="center"
+                                android:background="@drawable/textinputborder"
+                                android:hint="@string/taskinfo_hint_addmembers"
+                                android:inputType="textEmailAddress"
+                                android:text="@={viewmodel.newMemberEmail}"/>
+
+                            <ImageView
+                                android:id="@+id/et_member_add"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintStart_toEndOf="@id/new_member_email"
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:layout_gravity="start"
+                                android:layout_marginStart="10dp"
+                                android:src="@drawable/ic_taskinfo_plus"
+                                android:onClick="@{() -> viewmodel.addSelectedMember()}"/>
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/task_members_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            tools:listitem="@layout/task_member_item"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
                     </LinearLayout>
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/task_members_list"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        tools:listitem="@layout/task_member_item"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                </ScrollView>
 
-                </LinearLayout>
+            </LinearLayout>
 
-            </ScrollView>
+            <Button
+                android:id="@+id/edittask_btn_changetaskcompleted"
+                android:text="@{viewmodel.isCompletedStateStr}"
+                android:onClick="@{() -> viewmodel.switchIsCompletedState()}"
+                tools:text="Сделано!"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:padding="10dp"
+                android:minWidth="200dp"
+                android:textColor="@color/white"
+                android:shadowColor="@color/white"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <Button
-            android:id="@+id/edittask_btn_changetaskcompleted"
-            android:text="@{viewmodel.isCompletedStateStr}"
-            android:onClick="@{() -> viewmodel.switchIsCompletedState()}"
-            tools:text="Сделано!"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:padding="10dp"
-            android:minWidth="200dp"
-            android:textColor="@color/white"
-            android:shadowColor="@color/white"
-            android:layout_gravity="center"
-            android:layout_margin="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+        <RelativeLayout
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".fragments.ProgressBarFragment"
+            android:visibility="@{viewmodel.isLoading ? View.VISIBLE : View.GONE}"
+            tools:visibility="gone"
+            android:background="#CCFFFFFF" >
+
+            <ProgressBar
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerInParent="true"
+                android:visibility="visible"/>
+
+        </RelativeLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 </layout>

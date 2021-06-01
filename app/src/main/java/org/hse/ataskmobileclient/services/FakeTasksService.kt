@@ -1,11 +1,12 @@
 package org.hse.ataskmobileclient.services
 
+import kotlinx.coroutines.delay
 import org.hse.ataskmobileclient.models.Task
 import java.util.*
 import kotlin.collections.ArrayList
 
 class FakeTasksService : ITasksService {
-    override suspend fun getAllTasksAsync(startTime : Date?, endTime : Date?, label : String?)
+    override suspend fun getAllTasks(startTime : Date?, endTime : Date?, label : String?)
         : ArrayList<Task>
     {
         var allTasks = getAllTasks()
@@ -18,7 +19,20 @@ class FakeTasksService : ITasksService {
         if (label != null)
             allTasks = allTasks.filter { it.label == label }
 
+        delay(500)
         return ArrayList(allTasks)
+    }
+
+    override suspend fun deleteTask(task: Task): Boolean {
+        return true
+    }
+
+    override suspend fun updateTask(task: Task): Boolean {
+        return true
+    }
+
+    override suspend fun addTask(task: Task): Boolean {
+        return true
     }
 
     private fun getAllTasks() : List<Task> {

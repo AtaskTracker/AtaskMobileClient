@@ -2,7 +2,6 @@ package org.hse.ataskmobileclient.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -72,8 +71,16 @@ class MainActivity : AppCompatActivity() {
         })
 
         viewModel.pickLabelClickedEvent.observe(this, {
-            pickLabelViaDialog()
+            pickLabelForFilterViaDialog()
         })
+
+        viewModel.isLoading.observe(this, { isLoading ->
+            binding.pullToRefreshTasks.isRefreshing = isLoading
+        })
+
+        binding.pullToRefreshTasks.setOnRefreshListener {
+            viewModel.reloadData()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -120,13 +127,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openAddTaskScreen() {
-        Log.i(TAG, "========== Add task button clicked! ========")
         val intent = Intent(this@MainActivity, EditTaskActivity::class.java)
         startActivityForResult(intent, TASK_EDIT_CODE)
     }
 
     private fun pickDateViaDialog(dialogCode : Int) {
-        val fragment = DatePickerFragment {
+        val currentDate =
+            when (dialogCode){
+                PICK_START_TIME_FILTER_CODE -> viewModel.getFilterStartTime()
+                PICK_END_TIME_FILTER_CODE -> viewModel.getFilterEndTime()
+                else -> null
+            }
+
+        val fragment = DatePickerFragment(currentDate) {
             when (dialogCode) {
                 PICK_START_TIME_FILTER_CODE -> viewModel.setFilterStartTime(it)
                 PICK_END_TIME_FILTER_CODE -> viewModel.setFilterEndTime(it)
@@ -136,19 +149,17 @@ class MainActivity : AppCompatActivity() {
         fragment.show(supportFragmentManager, "datePicker")
     }
 
-    private fun pickLabelViaDialog() {
-        val labels = arrayListOf("Не задано")
-            .apply { addAll(viewModel.availableLabels) }
-            .toTypedArray()
+    private fun pickLabelForFilterViaDialog() {
+        val labels = viewModel.availableLabels.toTypedArray()
 
         val dialog = AlertDialog.Builder(this@MainActivity)
-            .setTitle("Pick label")
+            .setTitle(getString(R.string.pick_label_for_filter))
             .setItems(labels) { _, position ->
-                val pickedLabel =
-                    if (position == 0) null
-                    else labels.getOrNull(position)
-
+                val pickedLabel = labels.getOrNull(position)
                 viewModel.setFilterLabel(pickedLabel)
+            }
+            .setNeutralButton(getString(R.string.clear_label_filter)) { _, _ ->
+                viewModel.setFilterLabel(null)
             }
             .create()
 

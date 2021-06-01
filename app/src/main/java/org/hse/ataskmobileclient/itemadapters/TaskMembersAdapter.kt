@@ -54,7 +54,7 @@ class TaskMemberCallback : DiffUtil.ItemCallback<TaskMember>() {
 
     override fun areContentsTheSame(oldItem: TaskMember, newItem: TaskMember): Boolean {
         return  oldItem.id == newItem.id &&
-                oldItem.username == newItem.username &&
+                oldItem.email == newItem.email &&
                 oldItem.photoUrl == newItem.photoUrl
     }
 

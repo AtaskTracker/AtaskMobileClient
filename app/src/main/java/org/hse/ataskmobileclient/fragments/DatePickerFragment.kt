@@ -6,23 +6,31 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.DatePicker
 import androidx.fragment.app.DialogFragment
+import org.hse.ataskmobileclient.R
 import java.util.*
 
-class DatePickerFragment(private val onFinishListener: (date : Date?) -> Unit)
+class DatePickerFragment(private val initialDate: Date? = null,
+                         private val onFinishListener: (date : Date?) -> Unit)
     : DialogFragment(), DatePickerDialog.OnDateSetListener
 {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val c = Calendar.getInstance()
-        val year = c.get(Calendar.YEAR)
-        val month = c.get(Calendar.MONTH)
-        val day = c.get(Calendar.DAY_OF_MONTH)
+        val calendar = Calendar.getInstance()
+        if (initialDate != null)
+            calendar.time = initialDate
+
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
 
         val dialog = DatePickerDialog(requireActivity(), this, year, month, day)
-        dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Clear") { _, _ ->
+        dialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.clear_datetime)) { _, _ ->
             onFinishListener(null)
             dismiss()
         }
+
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), dialog)
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.ok_option), dialog)
 
         return dialog
     }

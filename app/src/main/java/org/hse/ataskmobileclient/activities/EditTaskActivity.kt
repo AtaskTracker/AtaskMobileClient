@@ -3,16 +3,16 @@ package org.hse.ataskmobileclient.activities
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.DatePickerDialog.OnDateSetListener
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.MediaStore
-import android.view.View
 import android.widget.*
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
 import org.hse.ataskmobileclient.EditTaskResult
 import org.hse.ataskmobileclient.EditTaskStatusCode
-import org.hse.ataskmobileclient.MockData
 import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.databinding.ActivityEditTaskBinding
 import org.hse.ataskmobileclient.fragments.DatePickerFragment
@@ -58,7 +57,10 @@ class EditTaskActivity : AppCompatActivity() {
         }
 
         viewModel.pickDateClickedEvent.observe(this, {
-            val datePickerFragment = DatePickerFragment { viewModel.dueDate.value = it }
+            val datePickerFragment = DatePickerFragment(viewModel.dueDate.value) { newDate ->
+                viewModel.dueDate.value = newDate
+            }
+
             datePickerFragment.show(supportFragmentManager, "datePicker")
         })
 
@@ -87,7 +89,17 @@ class EditTaskActivity : AppCompatActivity() {
         binding.backButton.setOnClickListener { finishEditingWithoutSaving() }
         binding.btnSave.setOnClickListener { saveResultsAndFinish() }
 
-        initAddMembersSpinner()
+        viewModel.onUserNotFoundEvent.observe(this, {
+            Toast.makeText(this, getString(R.string.user_with_email_not_found), Toast.LENGTH_SHORT).show()
+        })
+
+        viewModel.onUserAlreadyAddedEvent.observe(this, {
+            Toast.makeText(this, getString(R.string.user_already_added_to_task), Toast.LENGTH_SHORT).show()
+        })
+
+        viewModel.onPickLabelClickedEvent.observe(this, {
+            pickLabelViaDialog()
+        })
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
@@ -118,30 +130,11 @@ class EditTaskActivity : AppCompatActivity() {
         }
     }
 
-    private fun initAddMembersSpinner() {
-        val memberOptions = MockData.AvailableTaskMembers.map { it.username }
-        val adapter = ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item,
-            memberOptions)
-
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.etMemberNameSpinner.adapter = adapter
-        binding.etMemberNameSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                viewModel.selectedAccount = null
-            }
-
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?,
-                                        position: Int, id: Long)
-            {
-                viewModel.selectedAccount = MockData.AvailableTaskMembers[position]
-            }
-        }
-    }
-
     private fun requestTaskPhotoFromUser() {
         val options = arrayOf<CharSequence>(
             getString(R.string.action_take_photo),
-            getString(R.string.action_pick_photo_from_gallery)
+            getString(R.string.action_pick_photo_from_gallery),
+            getString(R.string.not_set),
         )
 
         val builder = AlertDialog.Builder(this@EditTaskActivity)
@@ -150,6 +143,7 @@ class EditTaskActivity : AppCompatActivity() {
                 when (which) {
                     0 -> askUserToTakePhoto()
                     1 -> askUserToSelectPhotoFromGallery()
+                    2 -> viewModel.taskPicture.value = null
                     else -> throw NotImplementedError()
                 }
             }
@@ -165,7 +159,7 @@ class EditTaskActivity : AppCompatActivity() {
         if (permissionResult == PackageManager.PERMISSION_DENIED){
             if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)){
                 Toast.makeText(this,
-                    "You need to grant access to camera to take a photo",
+                    getString(R.string.need_to_grant_camera_access),
                     Toast.LENGTH_LONG).show()
             }
 
@@ -187,7 +181,7 @@ class EditTaskActivity : AppCompatActivity() {
         if (permissionResult == PackageManager.PERMISSION_DENIED){
             if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)){
                 Toast.makeText(this,
-                    "You need to grant access to external storage to select a photo from gallery",
+                    getString(R.string.need_to_grant_gallery_access),
                     Toast.LENGTH_LONG).show()
             }
 
@@ -206,10 +200,10 @@ class EditTaskActivity : AppCompatActivity() {
     private fun askDeleteTaskConfirmation() {
         val confirmationDialog =
             AlertDialog.Builder(this@EditTaskActivity)
-                .setMessage("Are you sure you want to delete current task?")
+                .setMessage(getString(R.string.are_you_sure_you_want_to_delete_task))
                 .setCancelable(false)
-                .setPositiveButton("Yes") { _, _ -> this.deleteTaskAndFinishActivity() }
-                .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+                .setPositiveButton(getString(R.string.yes_option)) { _, _ -> this.deleteTaskAndFinishActivity() }
+                .setNegativeButton(getString(R.string.no_option)) { dialog, _ -> dialog.dismiss() }
                 .create()
 
         confirmationDialog.show()
@@ -235,6 +229,8 @@ class EditTaskActivity : AppCompatActivity() {
 
     private fun saveResultsAndFinish() {
         val task = viewModel.getEditedTask()
+        if (viewModel.isLabelNew)
+            viewModel.saveLabel()
 
         val statusCode =
             if (oldTask == null) EditTaskStatusCode.ADD
@@ -249,6 +245,50 @@ class EditTaskActivity : AppCompatActivity() {
         }
         setResult(RESULT_OK, intent)
         finish()
+    }
+
+    private fun pickLabelViaDialog() {
+        val availableLabels = viewModel.availableLabels.toTypedArray()
+        val dialog = AlertDialog.Builder(this)
+            .setTitle(getString(R.string.choose_label_for_task))
+            .setItems(availableLabels) { _, position ->
+                viewModel.taskLabel.value = availableLabels[position]
+            }
+            .setPositiveButton(getString(R.string.new_task_label)) { _, _ ->
+                askUserForNewLabel()
+            }
+            .setNeutralButton(getString(R.string.clear_task_label)) { _, _ ->
+                viewModel.taskLabel.value = null
+            }
+            .setNegativeButton(getString(R.string.cancel)) { _, _ -> }
+            .create()
+
+        dialog.show()
+    }
+
+    private fun askUserForNewLabel() {
+
+        val newLabelInput = EditText(this@EditTaskActivity)
+        val lp = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
+        newLabelInput.layoutParams = lp
+        val alertDialog = AlertDialog
+            .Builder(this)
+            .setView(newLabelInput)
+            .setPositiveButton(getString(R.string.ok_option)) { _, _ ->
+                viewModel.taskLabel.value = newLabelInput.text.toString()
+            }
+            .create()
+
+        val positiveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+        positiveButton.isEnabled = false
+        newLabelInput.addTextChangedListener { newLabel ->
+            positiveButton.isEnabled = newLabel.toString().isNotEmpty()
+        }
+
+        alertDialog.show()
     }
 
     companion object {

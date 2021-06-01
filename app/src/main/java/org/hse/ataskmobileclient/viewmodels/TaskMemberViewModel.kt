@@ -8,7 +8,7 @@ import org.hse.ataskmobileclient.models.TaskMember
 
 class TaskMemberViewModel(taskMember: TaskMember)
 {
-    val username = taskMember.username
+    val username = taskMember.email
     val photoUrl = taskMember.photoUrl
 
     companion object {
