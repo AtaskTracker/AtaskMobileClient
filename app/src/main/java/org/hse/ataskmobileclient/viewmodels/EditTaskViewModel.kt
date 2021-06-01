@@ -39,14 +39,14 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
     val pickDateClickedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
     val selectPictureClickedEvent: SingleLiveEvent<Any> = SingleLiveEvent()
     val onUserAlreadyAddedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
-    val onShowUserNotFoundEvent : SingleLiveEvent<Any> = SingleLiveEvent()
+    val onUserNotFoundEvent : SingleLiveEvent<Any> = SingleLiveEvent()
     val onPickLabelClickedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
 
     private val areAvailableLabelsLoaded : Boolean = false
     var availableLabels : List<String> = arrayListOf()
         private set
 
-    val isTaskPictureSelected = Transformations.map(taskPicture) { it != null }
+    val isTaskPictureSelected = Transformations.map(taskPicture) { taskPicture -> taskPicture != null }
 
     val dueDateStr : LiveData<String> = Transformations.map(dueDate) { newDate ->
         if (newDate == null) {
@@ -61,8 +61,8 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
         if (isCompleted) "Не сделано!" else "Сделано!"
     }
 
-    val taskLabelString = Transformations.map(taskLabel) {
-        val selectedLabel = it ?: "Не задано"
+    val taskLabelString = Transformations.map(taskLabel) { taskLabel ->
+        val selectedLabel = taskLabel ?: "Не задано"
         val stringPrefix = application.getString(R.string.task_label_prefix)
         "$stringPrefix: $selectedLabel"
     }
@@ -104,7 +104,7 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
         if (!areAvailableLabelsLoaded) {
             viewModelScope.launch {
                 isLoading.value = true
-                availableLabels = labelsService.getAvailableLabelsAsync()
+                availableLabels = labelsService.getAvailableLabels()
                 isLoading.value = false
             }
         }
@@ -124,7 +124,7 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
             isLoading.value = true
             val user = usersService.getUserByEmail(newMemberEmail)
             if (user == null)
-                onShowUserNotFoundEvent.call()
+                onUserNotFoundEvent.call()
             else{
                 val newTaskMember = TaskMember(user.id, user.email, user.photoUrl)
                 currentTaskMembers.add(newTaskMember)

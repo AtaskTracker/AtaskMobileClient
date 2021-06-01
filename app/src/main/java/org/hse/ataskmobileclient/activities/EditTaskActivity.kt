@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
 import org.hse.ataskmobileclient.EditTaskResult
 import org.hse.ataskmobileclient.EditTaskStatusCode
-import org.hse.ataskmobileclient.MockData
 import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.databinding.ActivityEditTaskBinding
 import org.hse.ataskmobileclient.fragments.DatePickerFragment
@@ -58,7 +57,10 @@ class EditTaskActivity : AppCompatActivity() {
         }
 
         viewModel.pickDateClickedEvent.observe(this, {
-            val datePickerFragment = DatePickerFragment { viewModel.dueDate.value = it }
+            val datePickerFragment = DatePickerFragment(viewModel.dueDate.value) { newDate ->
+                viewModel.dueDate.value = newDate
+            }
+
             datePickerFragment.show(supportFragmentManager, "datePicker")
         })
 
@@ -87,12 +89,12 @@ class EditTaskActivity : AppCompatActivity() {
         binding.backButton.setOnClickListener { finishEditingWithoutSaving() }
         binding.btnSave.setOnClickListener { saveResultsAndFinish() }
 
-        viewModel.onShowUserNotFoundEvent.observe(this, {
-            Toast.makeText(this, "Пользователь не найден", Toast.LENGTH_SHORT).show()
+        viewModel.onUserNotFoundEvent.observe(this, {
+            Toast.makeText(this, getString(R.string.user_with_email_not_found), Toast.LENGTH_SHORT).show()
         })
 
         viewModel.onUserAlreadyAddedEvent.observe(this, {
-            Toast.makeText(this, "Такой пользователь уже добавлен", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.user_already_added_to_task), Toast.LENGTH_SHORT).show()
         })
 
         viewModel.onPickLabelClickedEvent.observe(this, {
@@ -128,14 +130,6 @@ class EditTaskActivity : AppCompatActivity() {
         }
     }
 
-    private fun initAddMembersSpinner() {
-        val memberOptions = MockData.AvailableTaskMembers.map { it.email }
-        val adapter = ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item,
-            memberOptions)
-
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-    }
-
     private fun requestTaskPhotoFromUser() {
         val options = arrayOf<CharSequence>(
             getString(R.string.action_take_photo),
@@ -165,7 +159,7 @@ class EditTaskActivity : AppCompatActivity() {
         if (permissionResult == PackageManager.PERMISSION_DENIED){
             if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)){
                 Toast.makeText(this,
-                    "You need to grant access to camera to take a photo",
+                    getString(R.string.need_to_grant_camera_access),
                     Toast.LENGTH_LONG).show()
             }
 
@@ -187,7 +181,7 @@ class EditTaskActivity : AppCompatActivity() {
         if (permissionResult == PackageManager.PERMISSION_DENIED){
             if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)){
                 Toast.makeText(this,
-                    "You need to grant access to external storage to select a photo from gallery",
+                    getString(R.string.need_to_grant_gallery_access),
                     Toast.LENGTH_LONG).show()
             }
 
@@ -206,10 +200,10 @@ class EditTaskActivity : AppCompatActivity() {
     private fun askDeleteTaskConfirmation() {
         val confirmationDialog =
             AlertDialog.Builder(this@EditTaskActivity)
-                .setMessage("Are you sure you want to delete current task?")
+                .setMessage(getString(R.string.are_you_sure_you_want_to_delete_task))
                 .setCancelable(false)
-                .setPositiveButton("Yes") { _, _ -> this.deleteTaskAndFinishActivity() }
-                .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+                .setPositiveButton(getString(R.string.yes_option)) { _, _ -> this.deleteTaskAndFinishActivity() }
+                .setNegativeButton(getString(R.string.no_option)) { dialog, _ -> dialog.dismiss() }
                 .create()
 
         confirmationDialog.show()
@@ -256,16 +250,17 @@ class EditTaskActivity : AppCompatActivity() {
     private fun pickLabelViaDialog() {
         val availableLabels = viewModel.availableLabels.toTypedArray()
         val dialog = AlertDialog.Builder(this)
+            .setTitle(getString(R.string.choose_label_for_task))
             .setItems(availableLabels) { _, position ->
                 viewModel.taskLabel.value = availableLabels[position]
             }
-            .setPositiveButton("Новый") { _, _ ->
+            .setPositiveButton(getString(R.string.new_task_label)) { _, _ ->
                 askUserForNewLabel()
             }
-            .setNeutralButton("Очистить") { _, _ ->
+            .setNeutralButton(getString(R.string.clear_task_label)) { _, _ ->
                 viewModel.taskLabel.value = null
             }
-            .setNegativeButton("Отмена") { _, _ -> }
+            .setNegativeButton(getString(R.string.cancel)) { _, _ -> }
             .create()
 
         dialog.show()
@@ -273,24 +268,24 @@ class EditTaskActivity : AppCompatActivity() {
 
     private fun askUserForNewLabel() {
 
-        val input = EditText(this@EditTaskActivity)
+        val newLabelInput = EditText(this@EditTaskActivity)
         val lp = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.MATCH_PARENT
         )
-        input.layoutParams = lp
+        newLabelInput.layoutParams = lp
         val alertDialog = AlertDialog
             .Builder(this)
-            .setView(input)
-            .setPositiveButton("ОК") { _, _ ->
-                viewModel.taskLabel.value = input.text.toString()
+            .setView(newLabelInput)
+            .setPositiveButton(getString(R.string.ok_option)) { _, _ ->
+                viewModel.taskLabel.value = newLabelInput.text.toString()
             }
             .create()
 
         val positiveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
         positiveButton.isEnabled = false
-        input.addTextChangedListener {
-            positiveButton.isEnabled = it.toString().isNotEmpty()
+        newLabelInput.addTextChangedListener { newLabel ->
+            positiveButton.isEnabled = newLabel.toString().isNotEmpty()
         }
 
         alertDialog.show()

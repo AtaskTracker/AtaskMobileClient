@@ -23,8 +23,8 @@ import kotlin.collections.ArrayList
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val ungroupedDeadlineTasks : MutableLiveData<ArrayList<Task>> = MutableLiveData(arrayListOf())
     private val ungroupedBacklogTasks : MutableLiveData<ArrayList<Task>> = MutableLiveData(arrayListOf())
-    private val filterStartTime : MutableLiveData<Date?> = MutableLiveData(null)
-    private val filterEndTime : MutableLiveData<Date?> = MutableLiveData(null)
+    private val starTimeFilter : MutableLiveData<Date?> = MutableLiveData(null)
+    private val endTimeFilter : MutableLiveData<Date?> = MutableLiveData(null)
     private val filterLabel : MutableLiveData<String?> = MutableLiveData(null)
 
     private val tasksService : ITasksService = FakeTasksService()
@@ -41,7 +41,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     val isShowingDeadlineTasks : MutableLiveData<Boolean> = MutableLiveData(true)
-    val filterStartTimeString = Transformations.map(filterStartTime) {
+    val filterStartTimeString = Transformations.map(starTimeFilter) {
         val fromDateString = application.getString(R.string.from_date_filter)
         val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val startTimeString =
@@ -50,7 +50,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         "$fromDateString: $startTimeString"
     }
-    val filterEndTimeString = Transformations.map(filterEndTime) {
+    val filterEndTimeString = Transformations.map(endTimeFilter) {
         val toDateString = application.getString(R.string.to_date_filter)
         val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val endTimeString =
@@ -97,14 +97,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             isLoading.value = true
             reloadTasks()
-            availableLabels = labelsService.getAvailableLabelsAsync()
+            availableLabels = labelsService.getAvailableLabels()
             isLoading.value = false
         }
     }
 
+    private suspend fun reloadTasksWithLoading() {
+        isLoading.value = true
+        reloadTasks()
+        isLoading.value = false
+    }
+
     private suspend fun reloadTasks() {
-        val allTasks = tasksService.getAllTasksAsync(filterStartTime.value,
-            filterEndTime.value, filterLabel.value)
+        val allTasks = tasksService.getAllTasks(starTimeFilter.value,
+            endTimeFilter.value, filterLabel.value)
 
         ungroupedDeadlineTasks.value = ArrayList(allTasks.filter { it.dueDate != null })
         ungroupedBacklogTasks.value = ArrayList(allTasks.filter { it.dueDate == null })
@@ -112,7 +118,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addTask(task: Task) {
         var isAddedOnBackend = false
-        viewModelScope.launch { isAddedOnBackend = tasksService.addTaskAsync(task) }
+        viewModelScope.launch { isAddedOnBackend = tasksService.addTask(task) }
         if (!isAddedOnBackend)
             return
 
@@ -127,7 +133,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updateTask(task : Task) {
         var isUpdatedOnBackend = false
-        viewModelScope.launch { isUpdatedOnBackend = tasksService.updateTaskAsync(task) }
+        viewModelScope.launch { isUpdatedOnBackend = tasksService.updateTask(task) }
         if (!isUpdatedOnBackend)
             return
 
@@ -162,7 +168,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteTask(task: Task) {
         var isDeletedOnBackend = false
-        viewModelScope.launch { isDeletedOnBackend = tasksService.deleteTaskAsync(task) }
+        viewModelScope.launch { isDeletedOnBackend = tasksService.deleteTask(task) }
         if (!isDeletedOnBackend)
             return
 
@@ -181,19 +187,36 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         this.ungroupedBacklogTasks.value = backlogTasks
     }
 
-    fun setFilterStartTime(date: Date?) {
-        filterStartTime.value = date
-        viewModelScope.launch { reloadTasks() }
+    fun getFilterStartTime() = starTimeFilter.value
+    fun getFilterEndTime() = endTimeFilter.value
+
+    fun setFilterStartTime(newStartTimeFilter: Date?) {
+        starTimeFilter.value = newStartTimeFilter
+
+        if (newStartTimeFilter != null) {
+            val currentEndTimeFilter = endTimeFilter.value
+            if (currentEndTimeFilter != null && newStartTimeFilter > currentEndTimeFilter)
+                endTimeFilter.value = newStartTimeFilter
+        }
+
+        viewModelScope.launch { reloadTasksWithLoading() }
     }
 
-    fun setFilterEndTime(date: Date?) {
-        filterEndTime.value = date
-        viewModelScope.launch { reloadTasks() }
+    fun setFilterEndTime(newEndTimeFilter: Date?) {
+        endTimeFilter.value = newEndTimeFilter
+
+        if (newEndTimeFilter != null) {
+            val currentStartTimeFilter = starTimeFilter.value
+            if (currentStartTimeFilter != null && currentStartTimeFilter > newEndTimeFilter)
+                starTimeFilter.value = newEndTimeFilter
+        }
+
+        viewModelScope.launch { reloadTasksWithLoading() }
     }
 
     fun setFilterLabel(label: String?) {
         filterLabel.value = label
-        viewModelScope.launch { reloadTasks() }
+        viewModelScope.launch { reloadTasksWithLoading() }
     }
 
     companion object {
