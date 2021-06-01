@@ -79,102 +79,120 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <GridLayout
-                android:id="@+id/filters_block"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:columnCount="3"
-                android:rowCount="1"
-                android:orientation="horizontal"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" >
-
-                <TextView
-                    android:id="@+id/filter_start_time_str"
-                    android:text="@{viewModel.filterStartTimeString}"
-                    android:layout_column="0"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="5dp"
-                    android:layout_columnWeight="1"
-                    android:gravity="center"
-                    android:onClick="@{() -> viewModel.pickStartTime()}"
-                    android:visibility="@{viewModel.isShowingDeadlineTasks ? View.VISIBLE : View.GONE}"
-                    tools:text="От: 21 мая 2021" />
-
-                <TextView
-                    android:id="@+id/filter_end_time_str"
-                    android:text="@{viewModel.filterEndTimeString}"
-                    android:layout_column="1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="5dp"
-                    android:layout_columnWeight="1"
-                    android:gravity="center"
-                    android:onClick="@{() -> viewModel.pickEndTime()}"
-                    android:visibility="@{viewModel.isShowingDeadlineTasks ? View.VISIBLE : View.GONE}"
-                    tools:text="По: 22 мая 2021" />
-
-                <TextView
-                    android:id="@+id/filter_label"
-                    android:text="@{viewModel.filterLabelString}"
-                    android:layout_column="2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="5dp"
-                    android:layout_columnWeight="1"
-                    android:gravity="center"
-                    android:onClick="@{() -> viewModel.pickLabel()}"
-                    tools:text="Label: Критичные"/>
-
-            </GridLayout>
-
-            <FrameLayout
-                android:id="@+id/container"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_alignBottom="@id/navigation_bar"
-                app:layout_constraintTop_toBottomOf="@id/filters_block"
-                app:layout_constraintBottom_toTopOf="@id/navigation_bar"
+                android:layout_height="match_parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+                app:layout_constraintTop_toTopOf="parent">
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/deadline_tasks_list"
+                <GridLayout
+                    android:id="@+id/filters_block"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    android:layout_margin="10dp"
-                    android:visibility="@{viewModel.isShowingDeadlineTasks ? View.VISIBLE : View.GONE}"/>
+                    android:layout_height="wrap_content"
+                    android:columnCount="3"
+                    android:rowCount="1"
+                    android:orientation="horizontal"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" >
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/backlog_tasks_list"
+                    <TextView
+                        android:id="@+id/filter_start_time_str"
+                        android:text="@{viewModel.filterStartTimeString}"
+                        android:layout_column="0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="5dp"
+                        android:layout_columnWeight="1"
+                        android:gravity="center"
+                        android:onClick="@{() -> viewModel.pickStartTime()}"
+                        android:visibility="@{viewModel.isShowingDeadlineTasks ? View.VISIBLE : View.GONE}"
+                        tools:text="От: 21 мая 2021" />
+
+                    <TextView
+                        android:id="@+id/filter_end_time_str"
+                        android:text="@{viewModel.filterEndTimeString}"
+                        android:layout_column="1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="5dp"
+                        android:layout_columnWeight="1"
+                        android:gravity="center"
+                        android:onClick="@{() -> viewModel.pickEndTime()}"
+                        android:visibility="@{viewModel.isShowingDeadlineTasks ? View.VISIBLE : View.GONE}"
+                        tools:text="По: 22 мая 2021" />
+
+                    <TextView
+                        android:id="@+id/filter_label"
+                        android:text="@{viewModel.filterLabelString}"
+                        android:layout_column="2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="5dp"
+                        android:layout_columnWeight="1"
+                        android:gravity="center"
+                        android:onClick="@{() -> viewModel.pickLabel()}"
+                        tools:text="Label: Критичные"/>
+
+                </GridLayout>
+
+                <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                    android:id="@+id/pull_to_refresh_tasks"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    android:visibility="@{viewModel.isShowingDeadlineTasks ? View.GONE : View.VISIBLE}"
-                    android:layout_margin="10dp" />
+                    android:layout_height="0dp"
+                    app:layout_constraintTop_toBottomOf="@id/filters_block"
+                    app:layout_constraintBottom_toTopOf="@id/navigation_bar"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
 
-            </FrameLayout>
+                    <FrameLayout
+                        android:id="@+id/container"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_alignBottom="@id/navigation_bar"
+                        >
 
-            <ImageView
-                android:id="@+id/btn_add_task"
-                android:layout_width="75dp"
-                android:layout_height="75dp"
-                android:src="@drawable/ic_taskinfo_plus"
-                android:padding="10dp"
-                app:layout_constraintBottom_toTopOf="@id/navigation_bar"
-                app:layout_constraintEnd_toEndOf="parent" />
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/deadline_tasks_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                            android:layout_margin="10dp"
+                            android:visibility="@{viewModel.isShowingDeadlineTasks ? View.VISIBLE : View.GONE}"/>
 
-            <com.google.android.material.bottomnavigation.BottomNavigationView
-                android:id="@+id/navigation_bar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:menu="@menu/navigation"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:onNavigationItemSelected="@{viewModel.onNavigationItemSelected}" />
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/backlog_tasks_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                            android:visibility="@{viewModel.isShowingDeadlineTasks ? View.GONE : View.VISIBLE}"
+                            android:layout_margin="10dp" />
+
+                    </FrameLayout>
+
+                </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
+
+                <ImageView
+                    android:id="@+id/btn_add_task"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:src="@drawable/ic_taskinfo_plus"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toTopOf="@id/navigation_bar"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <com.google.android.material.bottomnavigation.BottomNavigationView
+                    android:id="@+id/navigation_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:menu="@menu/navigation"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:onNavigationItemSelected="@{viewModel.onNavigationItemSelected}" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

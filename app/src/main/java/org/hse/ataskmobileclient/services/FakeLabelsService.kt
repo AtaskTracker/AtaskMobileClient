@@ -8,4 +8,8 @@ class FakeLabelsService : ILabelsService {
             "Неважные",
         )
     }
+
+    override suspend fun postNewLabel(label: String) {
+
+    }
 }

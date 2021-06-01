@@ -74,6 +74,14 @@ class MainActivity : AppCompatActivity() {
         viewModel.pickLabelClickedEvent.observe(this, {
             pickLabelViaDialog()
         })
+
+        viewModel.isLoading.observe(this, {
+            binding.pullToRefreshTasks.isRefreshing = it
+        })
+
+        binding.pullToRefreshTasks.setOnRefreshListener {
+            viewModel.reloadData()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

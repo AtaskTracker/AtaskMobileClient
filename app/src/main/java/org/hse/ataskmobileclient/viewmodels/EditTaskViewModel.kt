@@ -5,34 +5,48 @@ import android.graphics.Bitmap
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.*
+import kotlinx.coroutines.launch
 import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.SingleLiveEvent
 import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.models.TaskMember
-import org.hse.ataskmobileclient.services.BitmapConverter
+import org.hse.ataskmobileclient.services.*
 import java.text.SimpleDateFormat
 import java.util.*
 
 
 class EditTaskViewModel(application: Application) : AndroidViewModel(application) {
 
+    private val usersService : IUsersService = FakeUsersService()
+    private val labelsService : ILabelsService = FakeLabelsService()
+    private val isCompleted : MutableLiveData<Boolean> = MutableLiveData(false)
+
     var id: UUID? = null
         private set
 
     var taskName = ""
     var description = ""
+    var newMemberEmail : String = ""
+    val taskLabel : MutableLiveData<String?> = MutableLiveData(null)
+    val isLabelNew : Boolean
+        get() = areAvailableLabelsLoaded && !availableLabels.contains(taskLabel.value)
+
     val members : MutableLiveData<ArrayList<TaskMember>> = MutableLiveData(arrayListOf())
     var dueDate : MutableLiveData<Date?> = MutableLiveData(null)
-    var selectedAccount : TaskMember? = null
     var taskPicture : MutableLiveData<Bitmap> = MutableLiveData(null)
+    val isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
 
     val pickDateClickedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
     val selectPictureClickedEvent: SingleLiveEvent<Any> = SingleLiveEvent()
+    val onUserAlreadyAddedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
+    val onShowUserNotFoundEvent : SingleLiveEvent<Any> = SingleLiveEvent()
+    val onPickLabelClickedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
 
-    val taskPictureSelected = Transformations.map(taskPicture) { it != null }
+    private val areAvailableLabelsLoaded : Boolean = false
+    var availableLabels : List<String> = arrayListOf()
+        private set
 
-    private var isCompleted : MutableLiveData<Boolean> = MutableLiveData(false)
-    private var label : String? = null
+    val isTaskPictureSelected = Transformations.map(taskPicture) { it != null }
 
     val dueDateStr : LiveData<String> = Transformations.map(dueDate) { newDate ->
         if (newDate == null) {
@@ -47,6 +61,12 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
         if (isCompleted) "Не сделано!" else "Сделано!"
     }
 
+    val taskLabelString = Transformations.map(taskLabel) {
+        val selectedLabel = it ?: "Не задано"
+        val stringPrefix = application.getString(R.string.task_label_prefix)
+        "$stringPrefix: $selectedLabel"
+    }
+
     fun initializeFromTask(task: Task) {
         id = task.id
         taskName = task.taskName
@@ -55,7 +75,7 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
         dueDate.value = task.dueDate
         members.value!!.clear()
         members.value!!.addAll(task.members)
-        label = task.label
+        taskLabel.value = task.label
         taskPicture.value =
             if (task.taskPictureBase64 == null) null
             else BitmapConverter.fromBase64(task.taskPictureBase64)
@@ -74,21 +94,44 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
             description,
             dueDate.value,
             members.value!!,
-            label,
+            taskLabel.value,
             taskPictureBase64)
     }
 
     fun onPickDateClicked() = pickDateClickedEvent.call()
+    fun onTaskPictureClicked() = selectPictureClickedEvent.call()
+    fun onPickLabelClicked() {
+        if (!areAvailableLabelsLoaded) {
+            viewModelScope.launch {
+                isLoading.value = true
+                availableLabels = labelsService.getAvailableLabelsAsync()
+                isLoading.value = false
+            }
+        }
 
-    fun removeDueDate() { dueDate.value = null }
-    fun removeTaskPicture() { taskPicture.value = null }
+        onPickLabelClickedEvent.call()
+    }
+    
     fun switchIsCompletedState() { isCompleted.value = !isCompleted.value!! }
-    fun onTaskPictureClicked() { selectPictureClickedEvent.call() }
 
     fun addSelectedMember() {
-        if (selectedAccount != null) {
-            members.value?.add(selectedAccount!!)
-            members.value = members.value
+
+        val currentTaskMembers = members.value ?: arrayListOf()
+        if (currentTaskMembers.any { it.email == newMemberEmail }) {
+            onUserAlreadyAddedEvent.call()
+        }
+        else viewModelScope.launch {
+            isLoading.value = true
+            val user = usersService.getUserByEmail(newMemberEmail)
+            if (user == null)
+                onShowUserNotFoundEvent.call()
+            else{
+                val newTaskMember = TaskMember(user.id, user.email, user.photoUrl)
+                currentTaskMembers.add(newTaskMember)
+                members.value = currentTaskMembers
+            }
+
+            isLoading.value = false
         }
     }
 
@@ -98,6 +141,17 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
 
         members.value!!.removeAt(position)
         members.value = members.value
+    }
+
+    fun saveLabel() {
+        val newLabel = taskLabel.value
+        if (!newLabel.isNullOrEmpty()) {
+            viewModelScope.launch {
+                isLoading.value = true
+                labelsService.postNewLabel(newLabel)
+                isLoading.value = false
+            }
+        }
     }
 
     companion object {

@@ -3,16 +3,16 @@ package org.hse.ataskmobileclient.activities
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.DatePickerDialog.OnDateSetListener
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.MediaStore
-import android.view.View
 import android.widget.*
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -87,7 +87,17 @@ class EditTaskActivity : AppCompatActivity() {
         binding.backButton.setOnClickListener { finishEditingWithoutSaving() }
         binding.btnSave.setOnClickListener { saveResultsAndFinish() }
 
-        initAddMembersSpinner()
+        viewModel.onShowUserNotFoundEvent.observe(this, {
+            Toast.makeText(this, "Пользователь не найден", Toast.LENGTH_SHORT).show()
+        })
+
+        viewModel.onUserAlreadyAddedEvent.observe(this, {
+            Toast.makeText(this, "Такой пользователь уже добавлен", Toast.LENGTH_SHORT).show()
+        })
+
+        viewModel.onPickLabelClickedEvent.observe(this, {
+            pickLabelViaDialog()
+        })
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
@@ -119,29 +129,18 @@ class EditTaskActivity : AppCompatActivity() {
     }
 
     private fun initAddMembersSpinner() {
-        val memberOptions = MockData.AvailableTaskMembers.map { it.username }
+        val memberOptions = MockData.AvailableTaskMembers.map { it.email }
         val adapter = ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item,
             memberOptions)
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.etMemberNameSpinner.adapter = adapter
-        binding.etMemberNameSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                viewModel.selectedAccount = null
-            }
-
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?,
-                                        position: Int, id: Long)
-            {
-                viewModel.selectedAccount = MockData.AvailableTaskMembers[position]
-            }
-        }
     }
 
     private fun requestTaskPhotoFromUser() {
         val options = arrayOf<CharSequence>(
             getString(R.string.action_take_photo),
-            getString(R.string.action_pick_photo_from_gallery)
+            getString(R.string.action_pick_photo_from_gallery),
+            getString(R.string.not_set),
         )
 
         val builder = AlertDialog.Builder(this@EditTaskActivity)
@@ -150,6 +149,7 @@ class EditTaskActivity : AppCompatActivity() {
                 when (which) {
                     0 -> askUserToTakePhoto()
                     1 -> askUserToSelectPhotoFromGallery()
+                    2 -> viewModel.taskPicture.value = null
                     else -> throw NotImplementedError()
                 }
             }
@@ -235,6 +235,8 @@ class EditTaskActivity : AppCompatActivity() {
 
     private fun saveResultsAndFinish() {
         val task = viewModel.getEditedTask()
+        if (viewModel.isLabelNew)
+            viewModel.saveLabel()
 
         val statusCode =
             if (oldTask == null) EditTaskStatusCode.ADD
@@ -249,6 +251,49 @@ class EditTaskActivity : AppCompatActivity() {
         }
         setResult(RESULT_OK, intent)
         finish()
+    }
+
+    private fun pickLabelViaDialog() {
+        val availableLabels = viewModel.availableLabels.toTypedArray()
+        val dialog = AlertDialog.Builder(this)
+            .setItems(availableLabels) { _, position ->
+                viewModel.taskLabel.value = availableLabels[position]
+            }
+            .setPositiveButton("Новый") { _, _ ->
+                askUserForNewLabel()
+            }
+            .setNeutralButton("Очистить") { _, _ ->
+                viewModel.taskLabel.value = null
+            }
+            .setNegativeButton("Отмена") { _, _ -> }
+            .create()
+
+        dialog.show()
+    }
+
+    private fun askUserForNewLabel() {
+
+        val input = EditText(this@EditTaskActivity)
+        val lp = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
+        input.layoutParams = lp
+        val alertDialog = AlertDialog
+            .Builder(this)
+            .setView(input)
+            .setPositiveButton("ОК") { _, _ ->
+                viewModel.taskLabel.value = input.text.toString()
+            }
+            .create()
+
+        val positiveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+        positiveButton.isEnabled = false
+        input.addTextChangedListener {
+            positiveButton.isEnabled = it.toString().isNotEmpty()
+        }
+
+        alertDialog.show()
     }
 
     companion object {

@@ -30,6 +30,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val tasksService : ITasksService = FakeTasksService()
     private val labelsService : ILabelsService = FakeLabelsService()
 
+    val isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
+
     val deadlineTasks = Transformations.map(ungroupedDeadlineTasks) {
         TasksGroupingUtil.getGroupedDeadlineTasks(application, it)
     }
@@ -43,7 +45,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val fromDateString = application.getString(R.string.from_date_filter)
         val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val startTimeString =
-            if (it == null) application.getString(R.string.filter_not_set)
+            if (it == null) application.getString(R.string.not_set)
             else sdf.format(it)
 
         "$fromDateString: $startTimeString"
@@ -52,13 +54,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val toDateString = application.getString(R.string.to_date_filter)
         val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val endTimeString =
-            if (it == null) application.getString(R.string.filter_not_set)
+            if (it == null) application.getString(R.string.not_set)
             else sdf.format(it)
 
         "$toDateString: $endTimeString"
     }
     val filterLabelString = Transformations.map(filterLabel) {
-        val labelString = it ?: application.getString(R.string.filter_not_set)
+        val labelString = it ?: application.getString(R.string.not_set)
         val labelFilterString = application.getString(R.string.label_filter)
 
         "$labelFilterString: $labelString"
@@ -93,8 +95,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun reloadData() {
         viewModelScope.launch {
+            isLoading.value = true
             reloadTasks()
             availableLabels = labelsService.getAvailableLabelsAsync()
+            isLoading.value = false
         }
     }
 
@@ -107,6 +111,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun addTask(task: Task) {
+        var isAddedOnBackend = false
+        viewModelScope.launch { isAddedOnBackend = tasksService.addTaskAsync(task) }
+        if (!isAddedOnBackend)
+            return
+
         val taskListToAddTo =
             if (task.dueDate != null) ungroupedDeadlineTasks
             else ungroupedBacklogTasks
@@ -117,6 +126,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateTask(task : Task) {
+        var isUpdatedOnBackend = false
+        viewModelScope.launch { isUpdatedOnBackend = tasksService.updateTaskAsync(task) }
+        if (!isUpdatedOnBackend)
+            return
+
         val deadlineTasks = ungroupedDeadlineTasks.value ?: arrayListOf()
         val backlogTasks = ungroupedBacklogTasks.value ?: arrayListOf()
         val oldPositionInDeadlineTasks = deadlineTasks.indexOfFirst { (it as? Task)?.id == task.id }
@@ -147,6 +161,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun deleteTask(task: Task) {
+        var isDeletedOnBackend = false
+        viewModelScope.launch { isDeletedOnBackend = tasksService.deleteTaskAsync(task) }
+        if (!isDeletedOnBackend)
+            return
+
         val deadlineTasks = this.ungroupedDeadlineTasks.value ?: arrayListOf()
         val backlogTasks = this.ungroupedBacklogTasks.value ?: arrayListOf()
         val oldPositionInDeadlineTasks = deadlineTasks.indexOfFirst { (it as? Task)?.id == task.id }
