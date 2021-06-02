@@ -13,6 +13,7 @@ import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import org.hse.ataskmobileclient.R
+import org.hse.ataskmobileclient.apis.API
 
 
 class SignInActivity : AppCompatActivity() {
@@ -29,6 +30,11 @@ class SignInActivity : AppCompatActivity() {
                 .build()
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
+
+        API().getAllTasks { tasks ->
+            Log.d(TAG, tasks.toString())
+            null
+        }
 
         val loginButton = findViewById<SignInButton>(R.id.login_button)
         loginButton.setOnClickListener {

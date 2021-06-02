@@ -1,5 +1,6 @@
 package org.hse.ataskmobileclient.models
 
+import com.google.gson.annotations.SerializedName
 import org.hse.ataskmobileclient.viewmodels.TaskListItem
 import java.util.*
 
