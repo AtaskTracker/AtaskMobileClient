@@ -6,7 +6,7 @@ class Urls {
     private val baseUrl = "https://api-atasktracker.herokuapp.com"
 
     fun getLabelUrl() : String {
-        return "$baseUrl/label/"
+        return "$baseUrl/label"
     }
 
     fun getTaskUrl(task_id: UUID) : String {

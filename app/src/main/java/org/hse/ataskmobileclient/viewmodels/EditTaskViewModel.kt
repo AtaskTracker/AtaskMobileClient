@@ -18,7 +18,7 @@ import java.util.*
 class EditTaskViewModel(application: Application) : AndroidViewModel(application) {
 
     private val usersService : IUsersService = UsersService()
-    private val labelsService : ILabelsService = FakeLabelsService()
+    private val labelsService : ILabelsService = LabelsService()
     private val isCompleted : MutableLiveData<Boolean> = MutableLiveData(false)
 
     var id: UUID? = null
@@ -107,10 +107,9 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
                 isLoading.value = true
                 availableLabels = labelsService.getAvailableLabels(authToken)
                 isLoading.value = false
+                onPickLabelClickedEvent.call()
             }
         }
-
-        onPickLabelClickedEvent.call()
     }
     
     fun switchIsCompletedState() { isCompleted.value = !isCompleted.value!! }

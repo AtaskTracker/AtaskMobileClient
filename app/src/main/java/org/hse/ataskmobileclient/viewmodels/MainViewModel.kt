@@ -28,7 +28,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val filterLabel : MutableLiveData<String?> = MutableLiveData(null)
 
     private val tasksService : ITasksService = TasksService()
-    private val labelsService : ILabelsService = FakeLabelsService()
+    private val labelsService : ILabelsService = LabelsService()
 
     val isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
 
