@@ -16,6 +16,7 @@ import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.apis.API
 import org.hse.ataskmobileclient.models.Label
 import org.hse.ataskmobileclient.models.TaskResult
+import org.hse.ataskmobileclient.services.SessionManager
 
 
 class SignInActivity : AppCompatActivity() {
@@ -105,6 +106,9 @@ class SignInActivity : AppCompatActivity() {
 
     private fun loginWithAccount(account: GoogleSignInAccount) {
         Log.i(TAG, "Singed in with Google!")
+
+        val sessionManager = SessionManager(this)
+        account.idToken?.let { sessionManager.saveAuthToken(it) }
 
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra(MainActivity.FULL_NAME_EXTRA, "${account.givenName} ${account.familyName}")
