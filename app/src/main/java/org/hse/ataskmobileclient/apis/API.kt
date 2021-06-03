@@ -2,27 +2,28 @@ package org.hse.ataskmobileclient.apis
 
 import android.util.Log
 import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.gson.jsonBody
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import org.hse.ataskmobileclient.dto.AuthDto
 import org.hse.ataskmobileclient.models.AuthResult
 import org.hse.ataskmobileclient.models.TaskResult
 import org.hse.ataskmobileclient.models.Urls
 
 class API {
 
-    // Headers can be changed here
-//    init{
-//        FuelManager.instance.baseHeaders = mapOf("User-Agent" to "AClient")
-//    }
+    fun authWithGoogle (token: String, responseHandler: (result: AuthResult) -> Unit?) {
 
-    fun auth (token: String, responseHandler: (result: AuthResult) -> Unit?) {
+        val authDto = AuthDto(token)
+
         Urls()
             .getGoogleAuthUrl()
-            .httpPost(listOf("code" to token))
+            .httpPost()
+            .jsonBody(authDto)
             .responseString { _, _, result ->
                 this.authResultHandler(result, responseHandler)
             }
@@ -44,12 +45,19 @@ class API {
             }
     }
 
-    fun getAllTasks(token: String, responseHandler : (result: ArrayList<TaskResult>) -> Unit?) {
-        Urls().getTaskUrl().httpGet()
+    suspend fun getAllTasks(token: String): List<TaskResult> {
+        val listType = object : TypeToken<ArrayList<TaskResult?>?>() {}.type
+        val (_, response, result) = Urls().getTaskUrl().httpGet()
             .header("Authorization", "Bearer $token")
-            .responseString { _, _, result ->
-                this.tasksResultHandler(result, responseHandler)
+            .awaitStringResponseResult()
+
+        return result.fold(
+            { data -> Gson().fromJson(data, listType) as List<TaskResult> },
+            {
+                Log.e(TAG, "Ошибка при запросе задач: ${it.exception.message}, ${response.statusCode}")
+                return listOf()
             }
+        )
     }
 
     private fun authResultHandler (
@@ -87,5 +95,9 @@ class API {
                 responseHandler.invoke(taskResult)
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "API"
     }
 }

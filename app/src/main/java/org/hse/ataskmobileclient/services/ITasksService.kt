@@ -5,7 +5,7 @@ import java.util.*
 
 interface ITasksService {
 
-    suspend fun getAllTasks(startTime : Date?, endTime : Date?, label : String?) : List<Task>
+    suspend fun getAllTasks(token: String, startTime : Date?, endTime : Date?, label : String?) : List<Task>
 
     suspend fun deleteTask(task: Task) : Boolean
     

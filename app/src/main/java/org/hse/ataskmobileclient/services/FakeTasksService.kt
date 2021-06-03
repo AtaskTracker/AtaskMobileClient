@@ -6,7 +6,12 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class FakeTasksService : ITasksService {
-    override suspend fun getAllTasks(startTime : Date?, endTime : Date?, label : String?)
+    override suspend fun getAllTasks(
+        token: String,
+        startTime: Date?,
+        endTime: Date?,
+        label: String?
+    )
         : ArrayList<Task>
     {
         var allTasks = getAllTasks()

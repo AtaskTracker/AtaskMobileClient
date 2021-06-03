@@ -27,7 +27,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val endTimeFilter : MutableLiveData<Date?> = MutableLiveData(null)
     private val filterLabel : MutableLiveData<String?> = MutableLiveData(null)
 
-    private val tasksService : ITasksService = FakeTasksService()
+    private val tasksService : ITasksService = TasksService()
     private val labelsService : ILabelsService = FakeLabelsService()
 
     val isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
@@ -109,8 +109,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun reloadTasks() {
-        val allTasks = tasksService.getAllTasks(starTimeFilter.value,
-            endTimeFilter.value, filterLabel.value)
+
+        val authToken = getAuthToken()
+        val allTasks = tasksService.getAllTasks(
+            authToken,
+            starTimeFilter.value, endTimeFilter.value, filterLabel.value
+        )
 
         ungroupedDeadlineTasks.value = ArrayList(allTasks.filter { it.dueDate != null })
         ungroupedBacklogTasks.value = ArrayList(allTasks.filter { it.dueDate == null })
@@ -217,6 +221,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setFilterLabel(label: String?) {
         filterLabel.value = label
         viewModelScope.launch { reloadTasksWithLoading() }
+    }
+
+    private fun getAuthToken(): String {
+        val application = getApplication<Application>()
+        return SessionManager(application).fetchAuthToken() ?: ""
     }
 
     companion object {

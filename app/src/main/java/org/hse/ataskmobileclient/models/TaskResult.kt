@@ -21,6 +21,6 @@ class TaskResult(
         val status: String? = null,
 //        val date: Date? = null,
         val date: String? = null,
-        val members: ArrayList<String>,
+        val members: ArrayList<String>?,
         val labels: ArrayList<Label>
 )
