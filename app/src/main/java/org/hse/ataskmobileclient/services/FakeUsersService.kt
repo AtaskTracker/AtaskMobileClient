@@ -5,7 +5,7 @@ import org.hse.ataskmobileclient.models.User
 import java.util.*
 
 class FakeUsersService : IUsersService {
-    override suspend fun getUserByEmail(email: String): User? {
+    override suspend fun getUserByEmail(token: String, email: String): User? {
         val allUsers = getAllUsers()
         delay(500)
         return allUsers.firstOrNull { it.email == email }

@@ -17,7 +17,7 @@ import java.util.*
 
 class EditTaskViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val usersService : IUsersService = FakeUsersService()
+    private val usersService : IUsersService = UsersService()
     private val labelsService : ILabelsService = FakeLabelsService()
     private val isCompleted : MutableLiveData<Boolean> = MutableLiveData(false)
 
@@ -28,12 +28,11 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
     var description = ""
     var newMemberEmail : String = ""
     val taskLabel : MutableLiveData<String?> = MutableLiveData(null)
-    val isLabelNew : Boolean
-        get() = areAvailableLabelsLoaded && !availableLabels.contains(taskLabel.value)
 
     val members : MutableLiveData<ArrayList<TaskMember>> = MutableLiveData(arrayListOf())
     var dueDate : MutableLiveData<Date?> = MutableLiveData(null)
     var taskPicture : MutableLiveData<Bitmap> = MutableLiveData(null)
+
     val isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
 
     val pickDateClickedEvent : SingleLiveEvent<Any> = SingleLiveEvent()
@@ -101,10 +100,12 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
     fun onPickDateClicked() = pickDateClickedEvent.call()
     fun onTaskPictureClicked() = selectPictureClickedEvent.call()
     fun onPickLabelClicked() {
+
+        val authToken = getAuthToken()
         if (!areAvailableLabelsLoaded) {
             viewModelScope.launch {
                 isLoading.value = true
-                availableLabels = labelsService.getAvailableLabels()
+                availableLabels = labelsService.getAvailableLabels(authToken)
                 isLoading.value = false
             }
         }
@@ -121,8 +122,9 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
             onUserAlreadyAddedEvent.call()
         }
         else viewModelScope.launch {
+            val authToken = getAuthToken()
             isLoading.value = true
-            val user = usersService.getUserByEmail(newMemberEmail)
+            val user = usersService.getUserByEmail(authToken, newMemberEmail)
             if (user == null)
                 onUserNotFoundEvent.call()
             else{
@@ -143,15 +145,9 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
         members.value = members.value
     }
 
-    fun saveLabel() {
-        val newLabel = taskLabel.value
-        if (!newLabel.isNullOrEmpty()) {
-            viewModelScope.launch {
-                isLoading.value = true
-                labelsService.postNewLabel(newLabel)
-                isLoading.value = false
-            }
-        }
+    private fun getAuthToken(): String {
+        val application = getApplication<Application>()
+        return SessionManager(application).fetchAuthToken() ?: ""
     }
 
     companion object {

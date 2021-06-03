@@ -229,8 +229,6 @@ class EditTaskActivity : AppCompatActivity() {
 
     private fun saveResultsAndFinish() {
         val task = viewModel.getEditedTask()
-        if (viewModel.isLabelNew)
-            viewModel.saveLabel()
 
         val statusCode =
             if (oldTask == null) EditTaskStatusCode.ADD

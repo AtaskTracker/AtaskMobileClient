@@ -94,10 +94,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun reloadData() {
+        val authToken = getAuthToken()
         viewModelScope.launch {
             isLoading.value = true
             reloadTasks()
-            availableLabels = labelsService.getAvailableLabels()
+            availableLabels = labelsService.getAvailableLabels(authToken)
             isLoading.value = false
         }
     }

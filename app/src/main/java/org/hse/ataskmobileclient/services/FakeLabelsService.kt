@@ -1,15 +1,11 @@
 package org.hse.ataskmobileclient.services
 
 class FakeLabelsService : ILabelsService {
-    override suspend fun getAvailableLabels(): List<String> {
+    override suspend fun getAvailableLabels(token: String): List<String> {
         return listOf(
             "Критичные",
             "Важные",
             "Неважные",
         )
-    }
-
-    override suspend fun postNewLabel(label: String) {
-
     }
 }

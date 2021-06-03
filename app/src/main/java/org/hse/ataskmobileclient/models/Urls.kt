@@ -32,4 +32,8 @@ class Urls {
     fun getStatsUrl() : String {
         return "$baseUrl/stats/done"
     }
+
+    fun getUserUrl() : String {
+        return "$baseUrl/user"
+    }
 }
