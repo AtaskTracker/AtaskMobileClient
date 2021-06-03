@@ -45,6 +45,6 @@ class AuthApi {
     }
 
     companion object {
-        private const val TAG = "TasksApi"
+        private const val TAG = "AuthApi"
     }
 }
