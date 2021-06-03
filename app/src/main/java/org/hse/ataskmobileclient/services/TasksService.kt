@@ -1,6 +1,6 @@
 package org.hse.ataskmobileclient.services
 
-import org.hse.ataskmobileclient.apis.API
+import org.hse.ataskmobileclient.apis.TasksApi
 import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.models.TaskMember
 import java.text.SimpleDateFormat
@@ -13,7 +13,7 @@ class TasksService : ITasksService {
         endTime: Date?,
         label: String?
     ): List<Task> {
-        val taskResults = API().getAllTasks(token)
+        val taskResults = TasksApi().getAllTasks(token)
 
         val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
 
