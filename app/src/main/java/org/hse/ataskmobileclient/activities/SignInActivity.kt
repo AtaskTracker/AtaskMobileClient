@@ -14,6 +14,8 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.apis.API
+import org.hse.ataskmobileclient.models.Label
+import org.hse.ataskmobileclient.models.TaskResult
 
 
 class SignInActivity : AppCompatActivity() {
@@ -30,6 +32,22 @@ class SignInActivity : AppCompatActivity() {
                 .build()
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
+
+
+        API().createTask(
+            TaskResult(
+                null,
+                "Suppary",
+                "despiction",
+                null,
+                null,
+                null,
+                arrayListOf(),
+                arrayListOf(),
+            )) { createdTask ->
+            Log.d(TAG, createdTask[0].id.toString())
+            null
+        }
 
         API().getAllTasks { tasks ->
             Log.d(TAG, tasks.toString())

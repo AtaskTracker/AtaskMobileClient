@@ -13,13 +13,14 @@ enum class Status {
 }
 
 class TaskResult(
-        val id: UUID,
+        val id: UUID?,  // can be null for newly created tasks
         val summary: String,
         val description: String,
         val photo: String? = null,
 //        val status: Status? = null,
-        val status: Status? = null,
-        val date: Date? = null,
+        val status: String? = null,
+//        val date: Date? = null,
+        val date: String? = null,
         val members: ArrayList<String>,
         val labels: ArrayList<Label>
 )
