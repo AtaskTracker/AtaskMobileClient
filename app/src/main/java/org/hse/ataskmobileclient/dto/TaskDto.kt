@@ -1,4 +1,4 @@
-package org.hse.ataskmobileclient.models
+package org.hse.ataskmobileclient.dto
 
 import java.util.*
 
@@ -12,7 +12,7 @@ enum class Status {
         NOT_DONE
 }
 
-class TaskResult(
+class TaskDto(
         val id: UUID?,  // can be null for newly created tasks
         val summary: String,
         val description: String,
@@ -22,5 +22,5 @@ class TaskResult(
 //        val date: Date? = null,
         val date: String? = null,
         val members: ArrayList<String>?,
-        val labels: ArrayList<Label>
+        val labels: ArrayList<LabelDto>
 )

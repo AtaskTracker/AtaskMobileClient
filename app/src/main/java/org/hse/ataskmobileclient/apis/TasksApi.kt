@@ -9,17 +9,15 @@ import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import org.hse.ataskmobileclient.dto.AuthDto
-import org.hse.ataskmobileclient.models.AuthResult
-import org.hse.ataskmobileclient.models.TaskResult
+import org.hse.ataskmobileclient.dto.TaskDto
 import org.hse.ataskmobileclient.models.Urls
 
 class TasksApi {
 
     fun createTask(
         token: String,
-        task: TaskResult,
-        responseHandler : (result: ArrayList<TaskResult>) -> Unit?
+        task: TaskDto,
+        responseHandler : (result: ArrayList<TaskDto>) -> Unit?
     ) {
         val url = Urls().getTaskUrl()
         Urls()
@@ -32,14 +30,14 @@ class TasksApi {
             }
     }
 
-    suspend fun getAllTasks(token: String): List<TaskResult> {
-        val listType = object : TypeToken<ArrayList<TaskResult?>?>() {}.type
+    suspend fun getAllTasks(token: String): List<TaskDto> {
+        val listType = object : TypeToken<ArrayList<TaskDto?>?>() {}.type
         val (_, response, result) = Urls().getTaskUrl().httpGet()
             .header("Authorization", "Bearer $token")
             .awaitStringResponseResult()
 
         return result.fold(
-            { data -> Gson().fromJson(data, listType) as List<TaskResult> },
+            { data -> Gson().fromJson(data, listType) as List<TaskDto> },
             {
                 Log.e(TAG, "Ошибка при запросе задач: ${it.exception.message}, ${response.statusCode}")
                 return listOf()
@@ -49,7 +47,7 @@ class TasksApi {
 
     private fun tasksResultHandler (
         result : Result<String, FuelError>,
-        responseHandler: (result: ArrayList<TaskResult>) -> Unit?
+        responseHandler: (result: ArrayList<TaskDto>) -> Unit?
     )  {
         when (result) {
             is Result.Failure -> {
@@ -58,8 +56,8 @@ class TasksApi {
                 throw Exception(result.getException())
             }
             is Result.Success -> {
-                val listType = object : TypeToken<ArrayList<TaskResult?>?>() {}.type
-                val taskResult: ArrayList<TaskResult> = Gson().fromJson(result.get(), listType)
+                val listType = object : TypeToken<ArrayList<TaskDto?>?>() {}.type
+                val taskResult: ArrayList<TaskDto> = Gson().fromJson(result.get(), listType)
                 responseHandler.invoke(taskResult)
             }
         }

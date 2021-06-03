@@ -1,6 +1,6 @@
-package org.hse.ataskmobileclient.models
+package org.hse.ataskmobileclient.dto
 
-class AuthResult (
+class AuthResultDto (
     val name: String,
     val email: String,
     val picture_url: String

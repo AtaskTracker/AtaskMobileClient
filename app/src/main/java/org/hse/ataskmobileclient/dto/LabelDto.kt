@@ -1,6 +1,6 @@
-package org.hse.ataskmobileclient.models
+package org.hse.ataskmobileclient.dto
 
-class Label (
+class LabelDto (
         val summary: String,
         val color: String
 )
