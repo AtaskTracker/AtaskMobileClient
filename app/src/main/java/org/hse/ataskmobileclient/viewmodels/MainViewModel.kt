@@ -123,7 +123,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addTask(task: Task) {
         var isAddedOnBackend = false
-        viewModelScope.launch { isAddedOnBackend = tasksService.addTask(task) }
+        viewModelScope.launch { isAddedOnBackend = tasksService.addTask(getAuthToken(), task) }
         if (!isAddedOnBackend)
             return
 
@@ -138,7 +138,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updateTask(task : Task) {
         var isUpdatedOnBackend = false
-        viewModelScope.launch { isUpdatedOnBackend = tasksService.updateTask(task) }
+        viewModelScope.launch { isUpdatedOnBackend = tasksService.updateTask(
+            getAuthToken(),
+            task
+        ) }
         if (!isUpdatedOnBackend)
             return
 
@@ -173,7 +176,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteTask(task: Task) {
         var isDeletedOnBackend = false
-        viewModelScope.launch { isDeletedOnBackend = tasksService.deleteTask(task) }
+        viewModelScope.launch { isDeletedOnBackend = tasksService.deleteTask(
+            getAuthToken(),
+            task
+        ) }
         if (!isDeletedOnBackend)
             return
 

@@ -4,8 +4,10 @@ import android.util.Log
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
 import com.github.kittinunf.fuel.gson.jsonBody
+import com.github.kittinunf.fuel.httpDelete
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
+import com.github.kittinunf.fuel.httpPut
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -14,20 +16,65 @@ import org.hse.ataskmobileclient.models.Urls
 
 class TasksApi {
 
-    fun createTask(
+    suspend fun createTask(
         token: String,
-        task: TaskDto,
-        responseHandler : (result: ArrayList<TaskDto>) -> Unit?
-    ) {
-        val url = Urls().getTaskUrl()
-        Urls()
-            .getTaskUrl()
+        taskDto: TaskDto,
+    ) :TaskDto? {
+        val (_, response, result) = Urls().getTaskUrl()
             .httpPost()
             .header("Authorization", "Bearer $token")
-            .jsonBody(task) // haven't checked if it is working
-            .responseString { _, _, result ->
-                this.tasksResultHandler(result, responseHandler)
+            .jsonBody(taskDto) // haven't checked if it is working
+            .awaitStringResponseResult()
+
+        return result.fold(
+            { data -> Gson().fromJson(data, TaskDto::class.java) },
+            {
+                Log.e(TAG, "Ошибка при создании задачи: ${it.exception.message}, ${response.statusCode}")
+                return null
             }
+        )
+    }
+
+
+    suspend fun deleteTask(
+        token: String,
+        taskDto: TaskDto,
+    ) {
+        val (_, response, result) = Urls().getTaskUrl(taskDto.id!!) // /task/{id}
+            .httpDelete()
+            .header("Authorization", "Bearer $token")
+            .awaitStringResponseResult()
+
+        return result.fold(
+            { data -> Log.d(TAG, "Результат удаления: $data")},
+            {
+                Log.e(TAG, "Ошибка при создании задачи: ${it.exception.message}, ${response.statusCode}")
+            }
+        )
+    }
+
+    suspend fun updateTask(
+        token: String,
+        taskDto: TaskDto,
+    ) :TaskDto? {
+        if (taskDto.id == null) return null
+
+        val url = Urls().getTaskUrl(taskDto.id)
+
+        val (_, response, result) = Urls().getTaskUrl(taskDto.id!!) // /task/{id}
+            .httpPut()
+            .header("Authorization", "Bearer $token")
+            .jsonBody(taskDto) // haven't checked if it is working
+            .awaitStringResponseResult()
+        Log.d(TAG, url)
+
+        return result.fold(
+            { data -> Gson().fromJson(data, TaskDto::class.java) },
+            {
+                Log.e(TAG, "Ошибка при создании задачи: ${it.exception.message}, ${response.statusCode}")
+                return null
+            }
+        )
     }
 
     suspend fun getAllTasks(token: String): List<TaskDto> {

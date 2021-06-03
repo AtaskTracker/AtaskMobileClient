@@ -28,15 +28,15 @@ class FakeTasksService : ITasksService {
         return ArrayList(allTasks)
     }
 
-    override suspend fun deleteTask(task: Task): Boolean {
+    override suspend fun deleteTask(token: String, task: Task): Boolean {
         return true
     }
 
-    override suspend fun updateTask(task: Task): Boolean {
+    override suspend fun updateTask(token: String, task: Task): Boolean {
         return true
     }
 
-    override suspend fun addTask(task: Task): Boolean {
+    override suspend fun addTask(token: String, task: Task): Boolean {
         return true
     }
 

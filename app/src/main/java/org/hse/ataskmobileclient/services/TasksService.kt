@@ -1,6 +1,8 @@
 package org.hse.ataskmobileclient.services
 
 import org.hse.ataskmobileclient.apis.TasksApi
+import org.hse.ataskmobileclient.dto.LabelDto
+import org.hse.ataskmobileclient.dto.TaskDto
 import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.models.TaskMember
 import java.text.SimpleDateFormat
@@ -42,15 +44,41 @@ class TasksService : ITasksService {
         }
     }
 
-    override suspend fun deleteTask(task: Task): Boolean {
+    override suspend fun deleteTask(token: String, task: Task): Boolean {
+        val taskDto = dtoTaskConverter(task)
+        TasksApi().deleteTask(token, taskDto)
+
         return true
     }
 
-    override suspend fun updateTask(task: Task): Boolean {
-        return true
+    override suspend fun updateTask(token: String, task: Task): Boolean {
+        val taskDto = dtoTaskConverter(task)
+        val taskResult = TasksApi().updateTask(token, taskDto)
+
+        return taskResult != null
     }
 
-    override suspend fun addTask(task: Task): Boolean {
-        return true
+    override suspend fun addTask(token: String, task: Task): Boolean {
+        val taskDto = dtoTaskConverter(task)
+        val taskResult = TasksApi().createTask(token, taskDto)
+
+        return taskResult != null
+    }
+
+    private fun dtoTaskConverter (task: Task) : TaskDto {
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+        val dateVal = sdf.format(task.dueDate ?: Date())
+        val members = task.members?.map { member -> member.email }.toCollection(ArrayList<String>())
+
+        return TaskDto(
+            task.id,
+            task.taskName,
+            task.description,
+            task.taskPictureBase64,
+            if (task.isCompleted) "done" else "not done",
+            dateVal,
+            members,
+            arrayListOf(LabelDto(task.label ?: "", ""))
+        )
     }
 }
