@@ -13,6 +13,8 @@ import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import org.hse.ataskmobileclient.R
+import org.hse.ataskmobileclient.apis.AuthApi
+import org.hse.ataskmobileclient.services.SessionManager
 
 
 class SignInActivity : AppCompatActivity() {
@@ -80,7 +82,18 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun loginWithAccount(account: GoogleSignInAccount) {
-        Log.i(TAG, "Singed in with Google!")
+        val idToken = account.idToken
+        if (idToken == null){
+            Log.e(TAG, "Id token was null :O")
+            return
+        }
+
+        Log.i(TAG, "Singed in with Google! $idToken")
+
+        val sessionManager = SessionManager(this)
+        sessionManager.saveAuthToken(idToken)
+
+        AuthApi().authWithGoogle(idToken) {}
 
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra(MainActivity.FULL_NAME_EXTRA, "${account.givenName} ${account.familyName}")

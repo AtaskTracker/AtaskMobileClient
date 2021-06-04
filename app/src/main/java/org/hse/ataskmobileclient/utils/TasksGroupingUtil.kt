@@ -1,8 +1,9 @@
-package org.hse.ataskmobileclient.services
+package org.hse.ataskmobileclient.utils
 
 import android.content.Context
 import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.models.Task
+import org.hse.ataskmobileclient.services.DateTimeComparer
 import org.hse.ataskmobileclient.viewmodels.TaskListItem
 import org.hse.ataskmobileclient.viewmodels.TasksHeader
 import java.text.SimpleDateFormat

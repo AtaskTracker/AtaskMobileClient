@@ -9,9 +9,14 @@ import java.io.ByteArrayOutputStream
 class BitmapConverter {
 
     companion object {
-        fun fromBase64(photoBase64: String) : Bitmap {
-            val bytes = Base64.decode(photoBase64, Base64.DEFAULT)
-            return BitmapFactory.decodeByteArray(bytes, 0, bytes.count())
+        fun fromBase64(photoBase64: String) : Bitmap? {
+            try {
+                val bytes = Base64.decode(photoBase64, Base64.DEFAULT)
+                return BitmapFactory.decodeByteArray(bytes, 0, bytes.count())
+            }
+            catch (error: Error) {
+                return null
+            }
         }
 
         fun toBase64(photo: Bitmap) : String {

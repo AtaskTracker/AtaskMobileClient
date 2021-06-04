@@ -4,7 +4,7 @@ import org.hse.ataskmobileclient.viewmodels.TaskListItem
 import java.util.*
 
 class Task(
-        val id: UUID,
+        val id: String?,
         val isCompleted : Boolean,
         val taskName : String,
         val description : String,

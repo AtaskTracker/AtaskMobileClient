@@ -15,6 +15,7 @@ import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.SingleLiveEvent
 import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.services.*
+import org.hse.ataskmobileclient.utils.TasksGroupingUtil
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -27,8 +28,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val endTimeFilter : MutableLiveData<Date?> = MutableLiveData(null)
     private val filterLabel : MutableLiveData<String?> = MutableLiveData(null)
 
-    private val tasksService : ITasksService = FakeTasksService()
-    private val labelsService : ILabelsService = FakeLabelsService()
+    private val tasksService : ITasksService = TasksService()
+    private val labelsService : ILabelsService = LabelsService()
 
     val isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
 
@@ -95,9 +96,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun reloadData() {
         viewModelScope.launch {
+            val authToken = getAuthToken()
             isLoading.value = true
-            reloadTasks()
-            availableLabels = labelsService.getAvailableLabels()
+            reloadTasks(authToken)
+            availableLabels = labelsService.getAvailableLabels(authToken)
             isLoading.value = false
         }
     }
@@ -108,83 +110,88 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         isLoading.value = false
     }
 
-    private suspend fun reloadTasks() {
-        val allTasks = tasksService.getAllTasks(starTimeFilter.value,
-            endTimeFilter.value, filterLabel.value)
+    private suspend fun reloadTasks(token: String? = null) {
+        val authToken = token ?: getAuthToken()
+        val allTasks = tasksService.getAllTasks(
+            authToken,
+            starTimeFilter.value, endTimeFilter.value, filterLabel.value
+        )
 
         ungroupedDeadlineTasks.value = ArrayList(allTasks.filter { it.dueDate != null })
         ungroupedBacklogTasks.value = ArrayList(allTasks.filter { it.dueDate == null })
     }
 
     fun addTask(task: Task) {
-        var isAddedOnBackend = false
-        viewModelScope.launch { isAddedOnBackend = tasksService.addTask(task) }
-        if (!isAddedOnBackend)
-            return
+        viewModelScope.launch {
+            val addedTask = tasksService.addTask(getAuthToken(), task)
+                ?: return@launch
 
-        val taskListToAddTo =
-            if (task.dueDate != null) ungroupedDeadlineTasks
-            else ungroupedBacklogTasks
+            val taskListToAddTo =
+                if (addedTask.dueDate != null) ungroupedDeadlineTasks
+                else ungroupedBacklogTasks
 
-        val currentTaskList = taskListToAddTo.value ?: arrayListOf()
-        currentTaskList.add(task)
-        taskListToAddTo.value = currentTaskList
+            val currentTaskList = taskListToAddTo.value ?: arrayListOf()
+            currentTaskList.add(addedTask)
+            taskListToAddTo.value = currentTaskList
+        }
     }
 
     fun updateTask(task : Task) {
-        var isUpdatedOnBackend = false
-        viewModelScope.launch { isUpdatedOnBackend = tasksService.updateTask(task) }
-        if (!isUpdatedOnBackend)
-            return
+        viewModelScope.launch {
+            val updatedTask = tasksService.updateTask(getAuthToken(), task)
+                ?: return@launch
 
-        val deadlineTasks = ungroupedDeadlineTasks.value ?: arrayListOf()
-        val backlogTasks = ungroupedBacklogTasks.value ?: arrayListOf()
-        val oldPositionInDeadlineTasks = deadlineTasks.indexOfFirst { (it as? Task)?.id == task.id }
-        val oldPositionInBackLogTasks = backlogTasks.indexOfFirst { (it as? Task)?.id == task.id }
+            val deadlineTasks = ungroupedDeadlineTasks.value ?: arrayListOf()
+            val backlogTasks = ungroupedBacklogTasks.value ?: arrayListOf()
+            val oldPositionInDeadlineTasks = deadlineTasks.indexOfFirst { (it as? Task)?.id == updatedTask.id }
+            val oldPositionInBackLogTasks = backlogTasks.indexOfFirst { (it as? Task)?.id == updatedTask.id }
 
-        val newTaskHasDeadline = task.dueDate != null
-        if (newTaskHasDeadline) {
-            if (oldPositionInDeadlineTasks >= 0)
-                deadlineTasks[oldPositionInDeadlineTasks] = task
-            else
-                deadlineTasks.add(task)
+            val newTaskHasDeadline = updatedTask.dueDate != null
+            if (newTaskHasDeadline) {
+                if (oldPositionInDeadlineTasks >= 0)
+                    deadlineTasks[oldPositionInDeadlineTasks] = updatedTask
+                else
+                    deadlineTasks.add(updatedTask)
 
-            if (oldPositionInBackLogTasks >= 0)
-                backlogTasks.removeAt(oldPositionInBackLogTasks)
+                if (oldPositionInBackLogTasks >= 0)
+                    backlogTasks.removeAt(oldPositionInBackLogTasks)
+            }
+            else {
+                if (oldPositionInBackLogTasks >= 0)
+                    backlogTasks[oldPositionInBackLogTasks] = updatedTask
+                else
+                    backlogTasks.add(updatedTask)
+
+                if (oldPositionInDeadlineTasks >= 0)
+                    deadlineTasks.removeAt(oldPositionInDeadlineTasks)
+            }
+
+            ungroupedDeadlineTasks.value = deadlineTasks
+            ungroupedBacklogTasks.value = backlogTasks
         }
-        else {
-            if (oldPositionInBackLogTasks >= 0)
-                backlogTasks[oldPositionInBackLogTasks] = task
-            else
-                backlogTasks.add(task)
-
-            if (oldPositionInDeadlineTasks >= 0)
-                deadlineTasks.removeAt(oldPositionInDeadlineTasks)
-        }
-
-        this.ungroupedDeadlineTasks.value = deadlineTasks
-        this.ungroupedBacklogTasks.value = backlogTasks
     }
 
     fun deleteTask(task: Task) {
-        var isDeletedOnBackend = false
-        viewModelScope.launch { isDeletedOnBackend = tasksService.deleteTask(task) }
-        if (!isDeletedOnBackend)
-            return
 
-        val deadlineTasks = this.ungroupedDeadlineTasks.value ?: arrayListOf()
-        val backlogTasks = this.ungroupedBacklogTasks.value ?: arrayListOf()
-        val oldPositionInDeadlineTasks = deadlineTasks.indexOfFirst { (it as? Task)?.id == task.id }
-        val oldPositionInBackLogTasks = backlogTasks.indexOfFirst { (it as? Task)?.id == task.id }
+        viewModelScope.launch {
+            val isDeletedOnBackend: Boolean = tasksService.deleteTask(getAuthToken(), task)
+            if (!isDeletedOnBackend)
+                return@launch
 
-        if (oldPositionInDeadlineTasks >= 0)
-            deadlineTasks.removeAt(oldPositionInDeadlineTasks)
+            val deadlineTasks = ungroupedDeadlineTasks.value ?: arrayListOf()
+            val backlogTasks = ungroupedBacklogTasks.value ?: arrayListOf()
+            val oldPositionInDeadlineTasks = deadlineTasks.indexOfFirst { (it as? Task)?.id == task.id }
+            val oldPositionInBackLogTasks = backlogTasks.indexOfFirst { (it as? Task)?.id == task.id }
 
-        if (oldPositionInBackLogTasks >= 0)
-            backlogTasks.removeAt(oldPositionInBackLogTasks)
+            if (oldPositionInDeadlineTasks >= 0)
+                deadlineTasks.removeAt(oldPositionInDeadlineTasks)
 
-        this.ungroupedDeadlineTasks.value = deadlineTasks
-        this.ungroupedBacklogTasks.value = backlogTasks
+            if (oldPositionInBackLogTasks >= 0)
+                backlogTasks.removeAt(oldPositionInBackLogTasks)
+
+            ungroupedDeadlineTasks.value = deadlineTasks
+            ungroupedBacklogTasks.value = backlogTasks
+        }
     }
 
     fun getFilterStartTime() = starTimeFilter.value
@@ -217,6 +224,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setFilterLabel(label: String?) {
         filterLabel.value = label
         viewModelScope.launch { reloadTasksWithLoading() }
+    }
+
+    private fun getAuthToken(): String {
+        val application = getApplication<Application>()
+        return SessionManager(application).fetchAuthToken() ?: ""
     }
 
     companion object {
