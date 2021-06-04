@@ -26,6 +26,9 @@ class TasksApi {
             .jsonBody(taskDto) // haven't checked if it is working
             .awaitStringResponseResult()
 
+        val jsonBody = Gson().toJson(taskDto)
+        Log.i(TAG, "Добавление задачи, тело запроса: $jsonBody")
+
         return result.fold(
             { data -> Gson().fromJson(data, TaskDto::class.java) },
             {
@@ -40,7 +43,7 @@ class TasksApi {
         token: String,
         taskDto: TaskDto,
     ) {
-        val (_, response, result) = Urls().getTaskUrl(taskDto.id!!) // /task/{id}
+        val (_, response, result) = Urls().getTaskUrl(taskDto.uuid!!) // /task/{id}
             .httpDelete()
             .header("Authorization", "Bearer $token")
             .awaitStringResponseResult()
@@ -48,7 +51,7 @@ class TasksApi {
         return result.fold(
             { data -> Log.d(TAG, "Результат удаления: $data")},
             {
-                Log.e(TAG, "Ошибка при создании задачи: ${it.exception.message}, ${response.statusCode}")
+                Log.e(TAG, "Ошибка при удалении задачи: ${it.exception.message}, ${response.statusCode}")
             }
         )
     }
@@ -57,11 +60,11 @@ class TasksApi {
         token: String,
         taskDto: TaskDto,
     ) :TaskDto? {
-        if (taskDto.id == null) return null
+        if (taskDto.uuid == null) return null
 
-        val url = Urls().getTaskUrl(taskDto.id)
+        val url = Urls().getTaskUrl(taskDto.uuid)
 
-        val (_, response, result) = Urls().getTaskUrl(taskDto.id!!) // /task/{id}
+        val (_, response, result) = Urls().getTaskUrl(taskDto.uuid) // /task/{id}
             .httpPut()
             .header("Authorization", "Bearer $token")
             .jsonBody(taskDto) // haven't checked if it is working
@@ -71,20 +74,20 @@ class TasksApi {
         return result.fold(
             { data -> Gson().fromJson(data, TaskDto::class.java) },
             {
-                Log.e(TAG, "Ошибка при создании задачи: ${it.exception.message}, ${response.statusCode}")
+                Log.e(TAG, "Ошибка при обновлении задачи: ${it.exception.message}, ${response.statusCode}")
                 return null
             }
         )
     }
 
     suspend fun getAllTasks(token: String): List<TaskDto> {
-        val listType = object : TypeToken<ArrayList<TaskDto?>?>() {}.type
+        val listType = object : TypeToken<ArrayList<TaskDto>?>() {}.type
         val (_, response, result) = Urls().getTaskUrl().httpGet()
             .header("Authorization", "Bearer $token")
             .awaitStringResponseResult()
 
         return result.fold(
-            { data -> Gson().fromJson(data, listType) as List<TaskDto> },
+            { data -> Gson().fromJson(data, listType) as ArrayList<TaskDto> },
             {
                 Log.e(TAG, "Ошибка при запросе задач: ${it.exception.message}, ${response.statusCode}")
                 return listOf()

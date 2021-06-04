@@ -9,7 +9,7 @@ interface ITasksService {
 
     suspend fun deleteTask(token: String, task: Task) : Boolean
     
-    suspend fun updateTask(token: String, task: Task) : Boolean
+    suspend fun updateTask(token: String, task: Task) : Task?
 
-    suspend fun addTask(token: String, task: Task) : Boolean
+    suspend fun addTask(token: String, task: Task) : Task?
 }

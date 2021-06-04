@@ -21,7 +21,7 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
     private val labelsService : ILabelsService = LabelsService()
     private val isCompleted : MutableLiveData<Boolean> = MutableLiveData(false)
 
-    var id: UUID? = null
+    var id: String? = null
         private set
 
     var taskName = ""
@@ -87,7 +87,7 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
             else BitmapConverter.toBase64(taskPictureBitmap)
 
         return Task(
-            id ?: UUID.randomUUID(),
+            id,
             isCompleted.value!!,
             taskName,
             description,

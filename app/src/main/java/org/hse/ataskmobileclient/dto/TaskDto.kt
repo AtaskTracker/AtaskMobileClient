@@ -13,14 +13,29 @@ enum class Status {
 }
 
 class TaskDto(
-        val id: UUID?,  // can be null for newly created tasks
+        @SerializedName("uuid")
+        val uuid: String?,  // can be null for newly created tasks
+
+        @SerializedName("summary")
         val summary: String,
+
+        @SerializedName("description")
         val description: String,
+
+        @SerializedName("photo")
         val photo: String? = null,
 //        val status: Status? = null,
+
+        @SerializedName("status")
         val status: String? = null,
 //        val date: Date? = null,
-        val date: String? = null,
-        val members: ArrayList<String>?,
-        val labels: ArrayList<LabelDto>
+
+        @SerializedName("date")
+        val dueDate: String? = null,
+
+        @SerializedName("participants")
+        val participants: ArrayList<String>?,
+
+        @SerializedName("labels")
+        val labels: ArrayList<LabelDto>?
 )

@@ -9,7 +9,7 @@ class Urls {
         return "$baseUrl/label"
     }
 
-    fun getTaskUrl(task_id: UUID) : String {
+    fun getTaskUrl(task_id: String) : String {
         return "$baseUrl/task/$task_id"
     }
 

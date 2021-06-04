@@ -5,10 +5,14 @@ import org.hse.ataskmobileclient.dto.LabelDto
 import org.hse.ataskmobileclient.dto.TaskDto
 import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.models.TaskMember
+import org.hse.ataskmobileclient.utils.UuidUtils
 import java.text.SimpleDateFormat
 import java.util.*
 
 class TasksService : ITasksService {
+    private val taskDueDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+    private val usersService : IUsersService = UsersService()
+
     override suspend fun getAllTasks(
         token: String,
         startTime: Date?,
@@ -16,67 +20,81 @@ class TasksService : ITasksService {
         label: String?
     ): List<Task> {
         val taskResults = TasksApi().getAllTasks(token)
+        var allTasks = taskResults.map { taskResult -> convertTaskDtoToTask(taskResult) }
 
-        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+        if (startTime != null)
+            allTasks = allTasks.filter { it.dueDate != null && DateTimeComparer.compareDateOnly(it.dueDate, startTime) >= 0 }
 
-        return taskResults.map { taskResult ->
+        if (endTime != null)
+            allTasks = allTasks.filter { it.dueDate != null && DateTimeComparer.compareDateOnly(it.dueDate, endTime) <= 0 }
 
-            val dueDate =
-                if (taskResult.date != null) sdf.parse(taskResult.date)
-                else null
+        if (label != null)
+            allTasks = allTasks.filter { it.label == label }
 
-            val members = taskResult.members?.map { email ->
-                TaskMember(
-                    UUID(0L, 0L),
-                    email,
-                    ""
-                )
-            }
-
-            Task(
-                taskResult.id ?: UUID(0L, 0L),
-                taskResult.status == "done",
-                taskResult.summary,
-                taskResult.description,
-                dueDate,
-                members ?: listOf()
-            )
-        }
+        return allTasks
     }
 
     override suspend fun deleteTask(token: String, task: Task): Boolean {
-        val taskDto = dtoTaskConverter(task)
+        val taskDto = convertTaskToTaskDto(task)
         TasksApi().deleteTask(token, taskDto)
 
         return true
     }
 
-    override suspend fun updateTask(token: String, task: Task): Boolean {
-        val taskDto = dtoTaskConverter(task)
+    override suspend fun updateTask(token: String, task: Task): Task? {
+        val taskDto = convertTaskToTaskDto(task)
         val taskResult = TasksApi().updateTask(token, taskDto)
+            ?: return null
 
-        return taskResult != null
+        return convertTaskDtoToTask(taskResult)
     }
 
-    override suspend fun addTask(token: String, task: Task): Boolean {
-        val taskDto = dtoTaskConverter(task)
-        val taskResult = TasksApi().createTask(token, taskDto)
+    override suspend fun addTask(token: String, task: Task): Task? {
+        val taskDto = convertTaskToTaskDto(task)
+        val updatedTaskDto = TasksApi().createTask(token, taskDto) ?: return null
 
-        return taskResult != null
+        return convertTaskDtoToTask(updatedTaskDto)
     }
 
-    private fun dtoTaskConverter (task: Task) : TaskDto {
+    private fun convertTaskDtoToTask(taskDto: TaskDto) : Task {
+        val dueDate =
+            if (taskDto.dueDate != null) taskDueDateFormat.parse(taskDto.dueDate)
+            else null
+
+        val members = taskDto.participants?.map { email ->
+            TaskMember(
+                UUID(0L, 0L),
+                email,
+                ""
+            )
+        }
+
+        return Task(
+            taskDto.uuid,
+            taskDto.status == "done",
+            taskDto.summary,
+            taskDto.description,
+            dueDate,
+            members ?: listOf(),
+            taskDto.labels?.firstOrNull()?.summary,
+            taskDto.photo,
+        )
+    }
+
+    private fun convertTaskToTaskDto (task: Task) : TaskDto {
         val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
-        val dateVal = sdf.format(task.dueDate ?: Date())
-        val members = task.members?.map { member -> member.email }.toCollection(ArrayList<String>())
+        val dueDate =
+            if (task.dueDate == null) null
+            else sdf.format(task.dueDate)
+        val members = task.members.map { member -> member.email }.toCollection(ArrayList<String>())
 
         return TaskDto(
-            task.id,
+            task.id ?: "",
             task.taskName,
             task.description,
             task.taskPictureBase64,
             if (task.isCompleted) "done" else "not done",
-            dateVal,
+            dueDate,
             members,
             arrayListOf(LabelDto(task.label ?: "", ""))
         )

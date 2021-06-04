@@ -52,8 +52,9 @@ class EditTaskActivity : AppCompatActivity() {
 
         val taskJson = intent.getStringExtra(TASK_JSON)
         if (taskJson != null) {
-            oldTask = gson.fromJson(taskJson, Task::class.java)
-            binding.viewmodel!!.initializeFromTask(oldTask!!)
+            val currentTask = gson.fromJson(taskJson, Task::class.java)
+            binding.viewmodel!!.initializeFromTask(currentTask!!)
+            oldTask = currentTask
         }
 
         viewModel.pickDateClickedEvent.observe(this, {
