@@ -281,13 +281,14 @@ class EditTaskActivity : AppCompatActivity() {
             }
             .create()
 
+        alertDialog.show()
+
         val positiveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
         positiveButton.isEnabled = false
         newLabelInput.addTextChangedListener { newLabel ->
             positiveButton.isEnabled = newLabel.toString().isNotEmpty()
         }
 
-        alertDialog.show()
     }
 
     companion object {
