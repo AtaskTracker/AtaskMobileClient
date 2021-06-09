@@ -1,5 +1,6 @@
 package org.hse.ataskmobileclient.itemadapters
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,8 @@ import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.viewmodels.TaskListItem
 import org.hse.ataskmobileclient.viewmodels.TasksHeader
+import java.text.SimpleDateFormat
+import kotlin.collections.ArrayList
 
 class TasksAdapter(
     tasks : ArrayList<TaskListItem>,
@@ -81,6 +84,7 @@ class TaskViewHolder(
     private val cbTaskCompleted : CheckBox = itemView.findViewById(R.id.cb_task)
     private val tvTaskName : TextView = itemView.findViewById(R.id.tv_task_name)
     private val tvTaskLabel : TextView = itemView.findViewById(R.id.tv_task_label)
+    private val tvDueDate : TextView = itemView.findViewById(R.id.due_date_string)
 
     init {
         itemView.setOnClickListener { onListItemClick(it, adapterPosition) }
@@ -90,6 +94,13 @@ class TaskViewHolder(
         cbTaskCompleted.isChecked = taskItem.isCompleted
         tvTaskName.text = taskItem.taskName
         tvTaskLabel.text = taskItem.label ?: ""
+        if (taskItem.dueDate != null)
+            tvDueDate.text = sdf.format(taskItem.dueDate)
+    }
+
+    companion object {
+        @SuppressLint("SimpleDateFormat")
+        private val sdf = SimpleDateFormat("dd.MM.yyyy")
     }
 }
 

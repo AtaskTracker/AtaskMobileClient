@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center_vertical"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
-    android:background="@drawable/border" >
+    android:background="@drawable/border">
 
     <CheckBox
         android:id="@+id/cb_task"
@@ -16,26 +16,42 @@
         android:layout_marginEnd="0dp"
         android:layout_marginStart="5dp"/>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/tv_task_name"
-            style="@style/TaskName"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            tools:text="Выгулять собаку"
-            android:gravity="center_vertical" />
-
-        <TextView
-            android:id="@+id/tv_task_label"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="Лейбл" />
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tv_task_name"
+                style="@style/TaskName"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                tools:text="Выгулять собаку"
+                android:gravity="center_vertical" />
+
+            <TextView
+                android:id="@+id/tv_task_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Лейбл" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/due_date_string"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="12.06.21"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </LinearLayout>
