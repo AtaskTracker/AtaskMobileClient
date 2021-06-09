@@ -11,6 +11,7 @@ import java.util.*
 
 class TasksService : ITasksService {
     private val taskDueDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+    private val minDateValue = taskDueDateFormat.parse("0001-01-01T00:00:00Z")
     private val usersService : IUsersService = UsersService()
 
     override suspend fun getAllTasks(
@@ -57,9 +58,7 @@ class TasksService : ITasksService {
     }
 
     private fun convertTaskDtoToTask(taskDto: TaskDto) : Task {
-        val dueDate =
-            if (taskDto.dueDate != null) taskDueDateFormat.parse(taskDto.dueDate)
-            else null
+        val dueDate = parseDueDate(taskDto.dueDate)
 
         val members = taskDto.participants?.map { email ->
             TaskMember(
@@ -69,6 +68,8 @@ class TasksService : ITasksService {
             )
         }
 
+        val label = getTaskLabel(taskDto)
+
         return Task(
             taskDto.uuid,
             taskDto.status == "done",
@@ -76,7 +77,7 @@ class TasksService : ITasksService {
             taskDto.description,
             dueDate,
             members ?: listOf(),
-            taskDto.labels?.firstOrNull()?.summary,
+            label,
             taskDto.photo,
         )
     }
@@ -88,6 +89,10 @@ class TasksService : ITasksService {
             else sdf.format(task.dueDate)
         val members = task.members.map { member -> member.email }.toCollection(ArrayList<String>())
 
+        val labels =
+            if (task.label == null) arrayListOf<LabelDto>()
+            else arrayListOf(LabelDto(task.label, ""))
+
         return TaskDto(
             task.id ?: "",
             task.taskName,
@@ -96,7 +101,28 @@ class TasksService : ITasksService {
             if (task.isCompleted) "done" else "not done",
             dueDate,
             members,
-            arrayListOf(LabelDto(task.label ?: "", ""))
+            labels
         )
+    }
+
+    private fun parseDueDate(dueDateStr: String?) : Date? {
+        return if (dueDateStr == null) {
+            null
+        }
+        else {
+            val parsedValue = taskDueDateFormat.parse(dueDateStr)
+            if (parsedValue != null && parsedValue > minDateValue)
+                parsedValue
+            else
+                null
+        }
+    }
+
+    private fun getTaskLabel(taskDto: TaskDto) : String? {
+        val firstLabel = taskDto.labels?.firstOrNull()?.summary
+        if (firstLabel.isNullOrEmpty())
+            return null
+
+        return firstLabel
     }
 }
