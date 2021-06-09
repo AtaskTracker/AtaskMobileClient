@@ -39,5 +39,6 @@
     <string name="user_with_email_not_found">Пользователь не найден</string>
     <string name="pick_label_for_filter">Выберите лейбл для фильтра</string>
     <string name="clear_datetime">Очистить</string>
+    <string name="could_not_authorize_with_google_on_backend">Could not authorize with Google on backend</string>
 
 </resources>

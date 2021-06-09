@@ -3,22 +3,35 @@ package org.hse.ataskmobileclient.activities
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import org.hse.ataskmobileclient.R
-import org.hse.ataskmobileclient.apis.AuthApi
+import org.hse.ataskmobileclient.databinding.ActivitySignInBinding
 import org.hse.ataskmobileclient.services.SessionManager
+import org.hse.ataskmobileclient.viewmodels.SignInViewModel
 
 
 class SignInActivity : AppCompatActivity() {
     private lateinit var googleSignInClient: GoogleSignInClient
+
+    private val viewModel : SignInViewModel by lazy { ViewModelProvider(this).get(SignInViewModel::class.java) }
+    private val binding : ActivitySignInBinding by lazy {
+        val binding : ActivitySignInBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_sign_in)
+
+        binding.lifecycleOwner = this@SignInActivity
+        binding.viewModel = viewModel
+        binding
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,35 +45,26 @@ class SignInActivity : AppCompatActivity() {
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        val loginButton = findViewById<SignInButton>(R.id.login_button)
-        loginButton.setOnClickListener {
-            googleSingIn()
-        }
+        binding.loginButton.setOnClickListener { googleSingIn() }
+
+        viewModel.onAuthorizedOnBackendEvent.observe(this, { account ->
+            if (account == null){
+                val errorMessage = getString(R.string.could_not_authorize_with_google_on_backend)
+                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+                return@observe
+            }
+
+            val intent = Intent(this, MainActivity::class.java).apply {
+                putExtra(MainActivity.FULL_NAME_EXTRA, "${account.givenName} ${account.familyName}")
+                putExtra(MainActivity.PHOTO_URL_EXTRA, account.photoUrl.toString())
+            }
+            startActivity(intent)
+        })
     }
 
     private fun googleSingIn(){
-
         val signInIntent: Intent = googleSignInClient.signInIntent
         startActivityForResult(signInIntent, RC_SIGN_IN)
-
-//        val task = googleSignInClient.silentSignIn()
-//        if (task.isSuccessful){
-//            val signInAccount = task.result!!
-//            loginWithAccount(signInAccount)
-//        }
-//        else {
-//            task.addOnCompleteListener { task ->
-//                try {
-//                    val signInAccount = task.getResult(ApiException::class.java)!!
-//                    loginWithAccount(signInAccount)
-//                } catch (apiException: ApiException) {
-//                    Log.e(TAG, apiException.message ?: apiException.statusCode.toString())
-//
-//                    val signInIntent = googleSignInClient.signInIntent
-//                    startActivityForResult(signInIntent, RC_SIGN_IN)
-//                }
-//            }
-//        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -93,13 +97,7 @@ class SignInActivity : AppCompatActivity() {
         val sessionManager = SessionManager(this)
         sessionManager.saveAuthToken(idToken)
 
-        AuthApi().authWithGoogle(idToken) {}
-
-        val intent = Intent(this, MainActivity::class.java).apply {
-            putExtra(MainActivity.FULL_NAME_EXTRA, "${account.givenName} ${account.familyName}")
-            putExtra(MainActivity.PHOTO_URL_EXTRA, account.photoUrl.toString())
-        }
-        startActivity(intent)
+        viewModel.authWithGoogleOnBackend(account)
     }
 
     companion object {

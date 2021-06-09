@@ -51,17 +51,11 @@ class SingleLiveEvent<T> : MutableLiveData<T>() {
     }
 
     @MainThread
-    override fun setValue(t: T?) {
+    fun call(result: T? = null) {
         pending.set(true)
-        super.setValue(t)
+        super.setValue(result)
     }
-    /**
-     * Used for cases where T is Void, to make calls cleaner.
-     */
-    @MainThread
-    fun call() {
-        value = null
-    }
+
     companion object {
         private const val TAG = "SingleLiveEvent"
     }
