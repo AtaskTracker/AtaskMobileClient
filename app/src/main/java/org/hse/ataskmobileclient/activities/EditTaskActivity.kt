@@ -116,6 +116,11 @@ class EditTaskActivity : AppCompatActivity() {
                 Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show()
             }
         }
+        else if (requestCode == READ_EXTERNAL_STORAGE_CODE) {
+            val pickPhotoFromGallery = Intent(Intent.ACTION_PICK)
+            pickPhotoFromGallery.type = "image/*"
+            startActivityForResult(pickPhotoFromGallery, REQUEST_PHOTO_FROM_STORAGE)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
