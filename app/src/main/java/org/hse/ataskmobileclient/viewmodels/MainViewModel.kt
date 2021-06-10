@@ -10,10 +10,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.viewModelScope
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
@@ -85,6 +87,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     var availableLabels : List<String> = listOf()
 
+    private val deadlineTasksCompletedPercentage : MutableLiveData<Float?> = MutableLiveData(null)
+    private val backlogTasksCompletedPercentage : MutableLiveData<Float?> = MutableLiveData(null)
+
+    val currentCompletedPercentage = Transformations
+        .switchMap(deadlineTasksCompletedPercentage) { deadlineTasksCompletedPercentage ->
+            Transformations.map(backlogTasksCompletedPercentage) { backlogTasksCompletedPercentage ->
+                val progressFloat =
+                    if (isShowingDeadlineTasks.value!!) deadlineTasksCompletedPercentage
+                    else backlogTasksCompletedPercentage
+
+                progressFloat?.toInt() ?: 0
+            }
+    }
+
     fun pickStartTime() = pickStartTimeClickedEvent.call()
     fun pickEndTime() = pickEndTimeClickedEvent.call()
     fun pickLabel() = pickLabelClickedEvent.call()
@@ -111,15 +127,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             availableLabels = labelsService.getAvailableLabels(authToken)
             isLoading.value = false
 
-            val deadlineTasksCompletedPercentage = statsService.getCompletedDeadlineTasksStats(
+            deadlineTasksCompletedPercentage.value = statsService.getCompletedDeadlineTasksStats(
                 authToken, startTimeFilter.value, endTimeFilter.value)
 
-            val backlogTasksCompletedPercentage = statsService.getCompletedBacklogTasksStats(
+            backlogTasksCompletedPercentage.value = statsService.getCompletedBacklogTasksStats(
                 authToken, filterLabel.value)
 
             Log.i(TAG, "Stats: " +
-                    "deadline - $deadlineTasksCompletedPercentage, " +
-                    "backlog - $backlogTasksCompletedPercentage")
+                    "deadline - ${deadlineTasksCompletedPercentage.value}, " +
+                    "backlog - ${backlogTasksCompletedPercentage.value}")
         }
     }
 
@@ -267,10 +283,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         @JvmStatic
         @BindingAdapter("imageUrl")
         fun loadImage(view: ImageView, imageUrl: String?) {
-            if (imageUrl != null && imageUrl.isNotEmpty())
+            if (imageUrl != null && imageUrl.isNotEmpty()) {
+                val circularProgressDrawable = CircularProgressDrawable(view.context)
+                circularProgressDrawable.strokeWidth = 5f
+                circularProgressDrawable.centerRadius = 30f
+                circularProgressDrawable.start()
                 Glide
                     .with(view.context)
                     .load(imageUrl)
+                    .apply(RequestOptions()
+                        .placeholder(R.drawable.task_picture_placeholder)
+                    )
                     .listener(object: RequestListener<Drawable> {
                         override fun onLoadFailed(
                             e: GlideException?,
@@ -294,6 +317,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         }
                     })
                     .into(view)
+            }
         }
 
         @JvmStatic
