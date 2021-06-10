@@ -1,5 +1,6 @@
 package org.hse.ataskmobileclient.viewmodels
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -10,6 +11,7 @@ import org.hse.ataskmobileclient.apis.AuthApi
 class SignInViewModel : ViewModel() {
 
     val onAuthorizedOnBackendEvent : SingleLiveEvent<GoogleSignInAccount?> = SingleLiveEvent()
+    val isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
 
     fun authWithGoogleOnBackend(account: GoogleSignInAccount) {
         viewModelScope.launch {
@@ -17,7 +19,9 @@ class SignInViewModel : ViewModel() {
             if (idToken == null || idToken.isEmpty())
                 return@launch
 
+            isLoading.value = true
             val authorizedOnBackend = AuthApi().authWithGoogle(idToken)
+            isLoading.value = false
 
             if (authorizedOnBackend) {
                 onAuthorizedOnBackendEvent.call(account)

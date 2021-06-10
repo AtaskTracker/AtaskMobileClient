@@ -7,44 +7,72 @@
         <variable
             name="viewModel"
             type="org.hse.ataskmobileclient.viewmodels.SignInViewModel" />
+        <import type="android.view.View" />
     </data>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_gravity="center"
-        android:gravity="center_horizontal"
-        tools:context=".activities.SignInActivity">
+        android:layout_height="match_parent">
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_marginTop="50dp"
-            android:layout_marginBottom="75dp"
-            android:layout_height="200dp"
-            android:src="@drawable/timer" />
-
-        <TextView
-            style="@style/TopHeading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/app_title" />
-
-        <com.google.android.gms.common.SignInButton
-            android:id="@+id/login_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal"
+            tools:context=".activities.SignInActivity"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginBottom="10dp" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
-            style="@style/HintText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/authorization_availability" />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_marginTop="50dp"
+                android:layout_marginBottom="75dp"
+                android:layout_height="200dp"
+                android:src="@drawable/timer" />
 
-    </LinearLayout>
+            <TextView
+                style="@style/TopHeading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_title" />
+
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/login_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginBottom="10dp" />
+
+            <TextView
+                style="@style/HintText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/authorization_availability" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".fragments.ProgressBarFragment"
+            android:visibility="@{viewModel.isLoading ? View.VISIBLE : View.GONE}"
+            tools:visibility="gone"
+            android:background="#CCFFFFFF" >
+
+            <ProgressBar
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerInParent="true"
+                android:visibility="visible"/>
+
+        </RelativeLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
