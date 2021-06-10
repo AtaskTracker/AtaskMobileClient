@@ -11,6 +11,7 @@ import com.github.kittinunf.fuel.httpPut
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import org.hse.ataskmobileclient.dto.GoogleImageDto
 import org.hse.ataskmobileclient.dto.TaskDto
 import org.hse.ataskmobileclient.models.Urls
 
@@ -60,7 +61,9 @@ class TasksApi {
         token: String,
         taskDto: TaskDto,
     ) :TaskDto? {
-        if (taskDto.uuid == null) return null
+        if (taskDto.uuid == null)
+            return null
+
 
         val url = Urls().getTaskUrl(taskDto.uuid)
 

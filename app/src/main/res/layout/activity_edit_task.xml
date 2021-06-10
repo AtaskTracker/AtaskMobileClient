@@ -163,6 +163,7 @@
                                 app:layout_constraintEnd_toEndOf="parent"
                                 app:layout_constraintTop_toTopOf="parent"
                                 app:imageBitmap="@{viewmodel.taskPicture}"
+                                app:imageUrl="@{viewmodel.photoUrl}"
                                 tools:visibility="gone"/>
 
                             <ImageView

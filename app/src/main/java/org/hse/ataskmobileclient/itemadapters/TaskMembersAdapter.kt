@@ -49,12 +49,11 @@ interface OnItemRemoveClick {
 
 class TaskMemberCallback : DiffUtil.ItemCallback<TaskMember>() {
     override fun areItemsTheSame(oldItem: TaskMember, newItem: TaskMember): Boolean {
-        return oldItem.id == newItem.id
+        return oldItem.email == newItem.email
     }
 
     override fun areContentsTheSame(oldItem: TaskMember, newItem: TaskMember): Boolean {
-        return  oldItem.id == newItem.id &&
-                oldItem.email == newItem.email &&
+        return  oldItem.email == newItem.email &&
                 oldItem.photoUrl == newItem.photoUrl
     }
 

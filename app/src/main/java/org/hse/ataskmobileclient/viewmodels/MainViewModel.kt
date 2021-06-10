@@ -1,6 +1,8 @@
 package org.hse.ataskmobileclient.viewmodels
 
 import android.app.Application
+import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.MenuItem
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
@@ -9,10 +11,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.viewModelScope
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import org.hse.ataskmobileclient.R
 import org.hse.ataskmobileclient.SingleLiveEvent
+import org.hse.ataskmobileclient.apis.PhotosApi
+import org.hse.ataskmobileclient.dto.GoogleImageDto
 import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.services.*
 import org.hse.ataskmobileclient.utils.TasksGroupingUtil
@@ -24,12 +32,13 @@ import kotlin.collections.ArrayList
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val ungroupedDeadlineTasks : MutableLiveData<ArrayList<Task>> = MutableLiveData(arrayListOf())
     private val ungroupedBacklogTasks : MutableLiveData<ArrayList<Task>> = MutableLiveData(arrayListOf())
-    private val starTimeFilter : MutableLiveData<Date?> = MutableLiveData(null)
+    private val startTimeFilter : MutableLiveData<Date?> = MutableLiveData(null)
     private val endTimeFilter : MutableLiveData<Date?> = MutableLiveData(null)
     private val filterLabel : MutableLiveData<String?> = MutableLiveData(null)
 
     private val tasksService : ITasksService = TasksService()
     private val labelsService : ILabelsService = LabelsService()
+    private val statsService : IStatsService = StatsService()
 
     val isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
 
@@ -42,7 +51,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     val isShowingDeadlineTasks : MutableLiveData<Boolean> = MutableLiveData(true)
-    val filterStartTimeString = Transformations.map(starTimeFilter) {
+    val filterStartTimeString = Transformations.map(startTimeFilter) {
         val fromDateString = application.getString(R.string.from_date_filter)
         val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val startTimeString =
@@ -101,6 +110,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             reloadTasks(authToken)
             availableLabels = labelsService.getAvailableLabels(authToken)
             isLoading.value = false
+
+            val deadlineTasksCompletedPercentage = statsService.getCompletedDeadlineTasksStats(
+                authToken, startTimeFilter.value, endTimeFilter.value)
+
+            val backlogTasksCompletedPercentage = statsService.getCompletedBacklogTasksStats(
+                authToken, filterLabel.value)
+
+            Log.i(TAG, "Stats: " +
+                    "deadline - $deadlineTasksCompletedPercentage, " +
+                    "backlog - $backlogTasksCompletedPercentage")
         }
     }
 
@@ -114,7 +133,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val authToken = token ?: getAuthToken()
         val allTasks = tasksService.getAllTasks(
             authToken,
-            starTimeFilter.value, endTimeFilter.value, filterLabel.value
+            startTimeFilter.value, endTimeFilter.value, filterLabel.value
         )
 
         ungroupedDeadlineTasks.value = ArrayList(allTasks.filter { it.dueDate != null })
@@ -123,6 +142,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addTask(task: Task) {
         viewModelScope.launch {
+            if (task.photoBase64 != null)
+                task.photoUrl = task.photoBase64
+
             val addedTask = tasksService.addTask(getAuthToken(), task)
                 ?: return@launch
 
@@ -138,6 +160,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updateTask(task : Task) {
         viewModelScope.launch {
+
+            if (task.photoBase64 != null) {
+                val addedPhotoDto = PhotosApi().postPhotoAsync(GoogleImageDto(task.id!!, task.photoBase64))
+                val photoUrl = addedPhotoDto?.url
+                if (photoUrl != null && photoUrl.isNotEmpty())
+                    task.photoUrl = photoUrl
+            }
+
             val updatedTask = tasksService.updateTask(getAuthToken(), task)
                 ?: return@launch
 
@@ -194,11 +224,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun getFilterStartTime() = starTimeFilter.value
+    fun getFilterStartTime() = startTimeFilter.value
     fun getFilterEndTime() = endTimeFilter.value
 
     fun setFilterStartTime(newStartTimeFilter: Date?) {
-        starTimeFilter.value = newStartTimeFilter
+        startTimeFilter.value = newStartTimeFilter
 
         if (newStartTimeFilter != null) {
             val currentEndTimeFilter = endTimeFilter.value
@@ -213,9 +243,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         endTimeFilter.value = newEndTimeFilter
 
         if (newEndTimeFilter != null) {
-            val currentStartTimeFilter = starTimeFilter.value
+            val currentStartTimeFilter = startTimeFilter.value
             if (currentStartTimeFilter != null && currentStartTimeFilter > newEndTimeFilter)
-                starTimeFilter.value = newEndTimeFilter
+                startTimeFilter.value = newEndTimeFilter
         }
 
         viewModelScope.launch { reloadTasksWithLoading() }
@@ -232,11 +262,38 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     companion object {
+        private val TAG = "MainViewModel"
+
         @JvmStatic
         @BindingAdapter("imageUrl")
         fun loadImage(view: ImageView, imageUrl: String?) {
             if (imageUrl != null && imageUrl.isNotEmpty())
-                Glide.with(view.context).load(imageUrl).into(view)
+                Glide
+                    .with(view.context)
+                    .load(imageUrl)
+                    .listener(object: RequestListener<Drawable> {
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            Log.i(TAG, "Error loading picture: $imageUrl")
+                            return true
+                        }
+
+                        override fun onResourceReady(
+                            resource: Drawable?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            dataSource: DataSource?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            Log.i(TAG, "Loaded picture: $imageUrl")
+                            return false
+                        }
+                    })
+                    .into(view)
         }
 
         @JvmStatic

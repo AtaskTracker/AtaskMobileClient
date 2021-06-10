@@ -5,7 +5,6 @@ import org.hse.ataskmobileclient.dto.LabelDto
 import org.hse.ataskmobileclient.dto.TaskDto
 import org.hse.ataskmobileclient.models.Task
 import org.hse.ataskmobileclient.models.TaskMember
-import org.hse.ataskmobileclient.utils.UuidUtils
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -60,9 +59,10 @@ class TasksService : ITasksService {
     private fun convertTaskDtoToTask(taskDto: TaskDto) : Task {
         val dueDate = parseDueDate(taskDto.dueDate)
 
-        val members = taskDto.participants?.map { email ->
+        val members = taskDto.participants
+            ?.filter { it.isNotEmpty() }
+            ?.map { email ->
             TaskMember(
-                UUID(0L, 0L),
                 email,
                 ""
             )
@@ -97,7 +97,7 @@ class TasksService : ITasksService {
             task.id ?: "",
             task.taskName,
             task.description,
-            task.taskPictureBase64,
+            task.photoUrl,
             if (task.isCompleted) "done" else "not done",
             dueDate,
             members,

@@ -36,4 +36,8 @@ class Urls {
     fun getUserUrl() : String {
         return "$baseUrl/user"
     }
+
+    fun getGooglePhotoUrl() : String {
+        return "https://google-cloud-task-processor.herokuapp.com/storage/image"
+    }
 }

@@ -11,5 +11,6 @@ class Task(
         val dueDate: Date?,
         val members: List<TaskMember>,
         val label: String? = null,
-        val taskPictureBase64: String? = null,
+        var photoUrl: String? = null,
+        val photoBase64 : String? = null,
 ) : TaskListItem()

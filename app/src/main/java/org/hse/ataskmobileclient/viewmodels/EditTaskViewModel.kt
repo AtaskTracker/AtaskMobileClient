@@ -31,7 +31,8 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
 
     val members : MutableLiveData<ArrayList<TaskMember>> = MutableLiveData(arrayListOf())
     var dueDate : MutableLiveData<Date?> = MutableLiveData(null)
-    var taskPicture : MutableLiveData<Bitmap> = MutableLiveData(null)
+    var photoUrl: MutableLiveData<String?> = MutableLiveData(null)
+    var taskPicture : MutableLiveData<Bitmap?> = MutableLiveData(null)
 
     val isLoading : MutableLiveData<Boolean> = MutableLiveData(false)
 
@@ -45,7 +46,12 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
     var availableLabels : List<String> = arrayListOf()
         private set
 
-    val isTaskPictureSelected = Transformations.map(taskPicture) { taskPicture -> taskPicture != null }
+    val isTaskPictureSelected =
+        Transformations.switchMap(taskPicture) { taskPicture ->
+            Transformations.map(photoUrl) { photoUrl ->
+                taskPicture != null || (photoUrl != null && photoUrl.isNotEmpty())
+            }
+        }
 
     val dueDateStr : LiveData<String> = Transformations.map(dueDate) { newDate ->
         if (newDate == null) {
@@ -75,16 +81,15 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
         members.value!!.clear()
         members.value!!.addAll(task.members)
         taskLabel.value = task.label
-        taskPicture.value =
-            if (task.taskPictureBase64 == null) null
-            else BitmapConverter.fromBase64(task.taskPictureBase64)
+        photoUrl.value = task.photoUrl
+        loadMembersPhotosInBackground()
     }
 
     fun getEditedTask(): Task {
         val taskPictureBitmap = taskPicture.value
         val taskPictureBase64 =
             if (taskPictureBitmap == null) null
-            else BitmapConverter.toBase64(taskPictureBitmap)
+            else "data:image/jpeg;base64,${BitmapConverter.toBase64(taskPictureBitmap)}"
 
         return Task(
             id,
@@ -94,6 +99,7 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
             dueDate.value,
             members.value!!,
             taskLabel.value,
+            photoUrl.value,
             taskPictureBase64)
     }
 
@@ -127,7 +133,7 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
             if (user == null)
                 onUserNotFoundEvent.call()
             else{
-                val newTaskMember = TaskMember(user.id, user.email, user.photoUrl)
+                val newTaskMember = TaskMember(user.email, user.photoUrl)
                 currentTaskMembers.add(newTaskMember)
                 members.value = currentTaskMembers
             }
@@ -142,6 +148,22 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
 
         members.value!!.removeAt(position)
         members.value = members.value
+    }
+
+    private fun loadMembersPhotosInBackground() {
+        val authToken = getAuthToken()
+        viewModelScope.launch {
+            val emails = members.value?.map { it.email }
+                ?: return@launch
+
+            val membersWithPhotos : ArrayList<TaskMember> = arrayListOf()
+            for (email in emails) {
+                val user = usersService.getUserByEmail(authToken, email)
+                membersWithPhotos.add(TaskMember(email, user?.photoUrl ?: ""))
+            }
+
+            members.value = membersWithPhotos
+        }
     }
 
     private fun getAuthToken(): String {
