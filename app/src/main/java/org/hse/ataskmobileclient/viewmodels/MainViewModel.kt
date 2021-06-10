@@ -123,29 +123,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val authToken = getAuthToken()
             isLoading.value = true
-            reloadTasks(authToken)
+            reloadTasksData(authToken)
+            reloadStats(authToken)
             availableLabels = labelsService.getAvailableLabels(authToken)
             isLoading.value = false
-
-            deadlineTasksCompletedPercentage.value = statsService.getCompletedDeadlineTasksStats(
-                authToken, startTimeFilter.value, endTimeFilter.value)
-
-            backlogTasksCompletedPercentage.value = statsService.getCompletedBacklogTasksStats(
-                authToken, filterLabel.value)
-
-            Log.i(TAG, "Stats: " +
-                    "deadline - ${deadlineTasksCompletedPercentage.value}, " +
-                    "backlog - ${backlogTasksCompletedPercentage.value}")
         }
     }
 
     private suspend fun reloadTasksWithLoading() {
         isLoading.value = true
-        reloadTasks()
+        reloadTasksData()
         isLoading.value = false
     }
 
-    private suspend fun reloadTasks(token: String? = null) {
+    private suspend fun reloadTasksData(token: String? = null) {
         val authToken = token ?: getAuthToken()
         val allTasks = tasksService.getAllTasks(
             authToken,
@@ -156,6 +147,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
 //        val finishedDeadlineCount = ungroupedDeadlineTasks.value!!.filter { it.isCompleted }.size
 //        val finishedBacklogCount = ungroupedBacklogTasks.value!!.filter { it.isCompleted }.size
+    }
+
+    private suspend fun reloadStats(token: String? = null) {
+        val authToken = token ?: getAuthToken()
+        deadlineTasksCompletedPercentage.value = statsService.getCompletedDeadlineTasksStats(
+            authToken, startTimeFilter.value, endTimeFilter.value)
+
+        backlogTasksCompletedPercentage.value = statsService.getCompletedBacklogTasksStats(
+            authToken, filterLabel.value)
+
+        Log.i(TAG, "Stats: " +
+                "deadline - ${deadlineTasksCompletedPercentage.value}, " +
+                "backlog - ${backlogTasksCompletedPercentage.value}")
     }
 
     fun addTask(task: Task) {
@@ -173,6 +177,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val currentTaskList = taskListToAddTo.value ?: arrayListOf()
             currentTaskList.add(addedTask)
             taskListToAddTo.value = currentTaskList
+            reloadStats()
         }
     }
 
@@ -216,6 +221,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             ungroupedDeadlineTasks.value = deadlineTasks
             ungroupedBacklogTasks.value = backlogTasks
+            reloadStats()
         }
     }
 
@@ -239,6 +245,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             ungroupedDeadlineTasks.value = deadlineTasks
             ungroupedBacklogTasks.value = backlogTasks
+            reloadStats()
         }
     }
 
