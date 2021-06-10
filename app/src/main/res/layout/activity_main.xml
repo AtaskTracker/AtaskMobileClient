@@ -167,6 +167,15 @@
                             android:visibility="@{viewModel.isShowingDeadlineTasks ? View.GONE : View.VISIBLE}"
                             android:layout_margin="10dp" />
 
+                        <ProgressBar
+                            android:id="@+id/progress_bar"
+                            style="@style/CircularDeterminateProgressBar"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_width="111dp"
+                            android:layout_height="113dp"
+                            android:contentDescription="@string/completed_tasks_pb_description"
+                            tools:progress="60" />
+
                     </FrameLayout>
 
                 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

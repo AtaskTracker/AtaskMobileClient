@@ -39,5 +39,6 @@
     <string name="user_with_email_not_found">Пользователь не найден</string>
     <string name="pick_label_for_filter">Выберите лейбл для фильтра</string>
     <string name="clear_datetime">Очистить</string>
+    <string name="completed_tasks_pb_description">Процент выполненных задач</string>
 
 </resources>
