@@ -151,9 +151,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             authToken,
             startTimeFilter.value, endTimeFilter.value, filterLabel.value
         )
-
         ungroupedDeadlineTasks.value = ArrayList(allTasks.filter { it.dueDate != null })
         ungroupedBacklogTasks.value = ArrayList(allTasks.filter { it.dueDate == null })
+
+//        val finishedDeadlineCount = ungroupedDeadlineTasks.value!!.filter { it.isCompleted }.size
+//        val finishedBacklogCount = ungroupedBacklogTasks.value!!.filter { it.isCompleted }.size
     }
 
     fun addTask(task: Task) {
