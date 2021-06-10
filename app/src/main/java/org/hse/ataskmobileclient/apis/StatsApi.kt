@@ -34,7 +34,7 @@ class StatsApi(
         val parameters = arrayListOf<Pair<String, Any?>>()
 
         parameters.add("dateFrom" to "0001-01-01")
-        parameters.add("dateTo" to "0001-01-01")
+        parameters.add("dateTo" to "0001-01-02")
 
         if (label != null)
             parameters.add("label" to label)
@@ -45,7 +45,7 @@ class StatsApi(
     private suspend fun requestStatsWithParameters(parameters: List<Pair<String, Any?>>) : StatsDto? {
         val url = Urls().getStatsUrl()
 
-        val (request, _, result) = Fuel
+        val (request, response, result) = Fuel
             .get(url, parameters)
             .header("Authorization" to "Bearer $authToken")
             .awaitStringResponseResult()
