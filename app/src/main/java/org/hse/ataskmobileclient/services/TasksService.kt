@@ -19,19 +19,9 @@ class TasksService : ITasksService {
         endTime: Date?,
         label: String?
     ): List<Task> {
-        val taskResults = TasksApi().getAllTasks(token)
-        var allTasks = taskResults.map { taskResult -> convertTaskDtoToTask(taskResult) }
+        val taskResults = TasksApi().getAllTasks(token, startTime, endTime, label)
 
-        if (startTime != null)
-            allTasks = allTasks.filter { it.dueDate != null && DateTimeComparer.compareDateOnly(it.dueDate, startTime) >= 0 }
-
-        if (endTime != null)
-            allTasks = allTasks.filter { it.dueDate != null && DateTimeComparer.compareDateOnly(it.dueDate, endTime) <= 0 }
-
-        if (label != null)
-            allTasks = allTasks.filter { it.label == label }
-
-        return allTasks
+        return taskResults.map { taskResult -> convertTaskDtoToTask(taskResult) }
     }
 
     override suspend fun deleteTask(token: String, task: Task): Boolean {

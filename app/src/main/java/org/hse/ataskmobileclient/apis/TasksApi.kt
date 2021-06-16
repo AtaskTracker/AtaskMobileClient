@@ -14,8 +14,13 @@ import com.google.gson.reflect.TypeToken
 import org.hse.ataskmobileclient.dto.GoogleImageDto
 import org.hse.ataskmobileclient.dto.TaskDto
 import org.hse.ataskmobileclient.models.Urls
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 class TasksApi {
+
+    private val sdf = SimpleDateFormat("yyyy-MM-dd")
 
     suspend fun createTask(
         token: String,
@@ -83,11 +88,24 @@ class TasksApi {
         )
     }
 
-    suspend fun getAllTasks(token: String): List<TaskDto> {
+    suspend fun getAllTasks(token: String, startTime: Date?, endTime: Date?, label: String?): List<TaskDto> {
+
+        val parameters = arrayListOf<Pair<String, Any?>>()
+        if (startTime != null)
+            parameters.add("dateFrom" to sdf.format(startTime))
+
+        if (endTime != null)
+            parameters.add("dateTo" to sdf.format(endTime))
+
+        if (label != null)
+            parameters.add("label" to sdf.format(label))
+
         val listType = object : TypeToken<ArrayList<TaskDto>?>() {}.type
-        val (_, response, result) = Urls().getTaskUrl().httpGet()
+        val (request, response, result) = Urls().getTaskUrl().httpGet(parameters)
             .header("Authorization", "Bearer $token")
             .awaitStringResponseResult()
+
+        Log.i(TAG, "getAllTasks url=${request.url}")
 
         return result.fold(
             { data -> Gson().fromJson(data, listType) as ArrayList<TaskDto> },
