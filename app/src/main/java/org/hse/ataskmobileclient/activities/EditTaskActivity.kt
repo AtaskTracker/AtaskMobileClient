@@ -280,6 +280,7 @@ class EditTaskActivity : AppCompatActivity() {
         newLabelInput.layoutParams = lp
         val alertDialog = AlertDialog
             .Builder(this)
+            .setTitle(getString(R.string.title_new_label))
             .setView(newLabelInput)
             .setPositiveButton(getString(R.string.ok_option)) { _, _ ->
                 viewModel.taskLabel.value = newLabelInput.text.toString()
