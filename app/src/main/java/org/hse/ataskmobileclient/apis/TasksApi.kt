@@ -98,7 +98,7 @@ class TasksApi {
             parameters.add("dateTo" to sdf.format(endTime))
 
         if (label != null)
-            parameters.add("label" to sdf.format(label))
+            parameters.add("label" to label)
 
         val listType = object : TypeToken<ArrayList<TaskDto>?>() {}.type
         val (request, response, result) = Urls().getTaskUrl().httpGet(parameters)
