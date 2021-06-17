@@ -10,9 +10,18 @@ class TasksCompletionStats(
 ) {
 
     val backlogCompletionPercentage: Int
-        get() = (backlogTasksCompletedCount.toFloat() / backlogTasksTotalCount * 100).roundToInt()
+        get() {
+            if (backlogTasksTotalCount == 0)
+                return 0
+
+            return (backlogTasksCompletedCount.toFloat() / backlogTasksTotalCount * 100).roundToInt()
+        }
 
     val deadlineCompletionPercentage: Int
-        get() =
-            (deadlineTasksCompletedCount.toFloat() / deadlineTasksTotalCount * 100).roundToInt()
+        get() {
+            if (deadlineTasksTotalCount == 0)
+                return 0
+
+            return (deadlineTasksCompletedCount.toFloat() / deadlineTasksTotalCount * 100).roundToInt()
+        }
 }
