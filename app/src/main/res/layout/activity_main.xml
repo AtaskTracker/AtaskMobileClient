@@ -189,17 +189,17 @@
                         app:progress="@{viewModel.currentCompletedPercentage}"
                         tools:progress="60" />
 
-<!--                    <TextView-->
-<!--                        android:id="@+id/text_view_progress"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:textAppearance="@style/TextAppearance.AppCompat.Large"-->
-<!--                        app:layout_constraintBottom_toBottomOf="@+id/progress_bar"-->
-<!--                        app:layout_constraintEnd_toEndOf="@+id/progress_bar"-->
-<!--                        app:layout_constraintStart_toStartOf="@+id/progress_bar"-->
-<!--                        app:layout_constraintTop_toTopOf="@+id/progress_bar"-->
-<!--                        app:text="@{viewModel.currentCompletedPercentage.toString() + &quot;%&quot;}"-->
-<!--                        tools:text="60%" />-->
+                    <TextView
+                        android:id="@+id/text_view_progress_percentage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                        app:layout_constraintBottom_toBottomOf="@+id/progress_bar"
+                        app:layout_constraintEnd_toEndOf="@+id/progress_bar"
+                        app:layout_constraintStart_toStartOf="@+id/progress_bar"
+                        app:layout_constraintTop_toTopOf="@+id/progress_bar"
+                        app:text="@{viewModel.currentCompletedPercentage.toString() + &quot;%&quot;}"
+                        tools:text="60%" />
 
                     <TextView
                         android:id="@+id/text_view_progress_description"
@@ -209,7 +209,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/progress_bar"
-                        app:text="@{&quot;Вы выполнили &quot; + viewModel.currentCompletedPercentage.toString() + &quot;% задач&quot;}"
+                        app:text="@{viewModel.currentCompletedTasksDescription}"
                         tools:text="60%" />
 
 

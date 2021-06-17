@@ -6,10 +6,7 @@ import android.util.Log
 import android.view.MenuItem
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -24,12 +21,12 @@ import org.hse.ataskmobileclient.SingleLiveEvent
 import org.hse.ataskmobileclient.apis.PhotosApi
 import org.hse.ataskmobileclient.dto.GoogleImageDto
 import org.hse.ataskmobileclient.models.Task
+import org.hse.ataskmobileclient.models.TasksCompletionStats
 import org.hse.ataskmobileclient.services.*
 import org.hse.ataskmobileclient.utils.TasksGroupingUtil
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.roundToInt
 
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -89,10 +86,55 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     var availableLabels : List<String> = listOf()
 
-    private val deadlineTasksCompletedPercentage : MutableLiveData<Float> = MutableLiveData(0f)
-    private val backlogTasksCompletedPercentage : MutableLiveData<Float> = MutableLiveData(0f)
+    private val tasksCompletionStats: MutableLiveData<TasksCompletionStats> = MutableLiveData()
 
-    val currentCompletedPercentage : MutableLiveData<Int> = MutableLiveData(0)
+    val currentCompletedPercentage : LiveData<Int> = MediatorLiveData<Int>().apply {
+        fun update() {
+            val tasksCompletionStats = tasksCompletionStats.value
+            val isShowingDeadlineTasks = isShowingDeadlineTasks.value
+            if (tasksCompletionStats == null || isShowingDeadlineTasks == null) {
+                value = 0
+                return
+            }
+
+            value =
+                if (isShowingDeadlineTasks) tasksCompletionStats.deadlineCompletionPercentage
+                else tasksCompletionStats.backlogCompletionPercentage
+        }
+
+        addSource(isShowingDeadlineTasks) { update() }
+        addSource(tasksCompletionStats) { update() }
+
+        update()
+    }
+
+    val currentCompletedTasksDescription : LiveData<String> = MediatorLiveData<String>().apply {
+        fun update() {
+            val tasksCompletionStats = tasksCompletionStats.value
+            val isShowingDeadlineTasks = isShowingDeadlineTasks.value
+            if (tasksCompletionStats == null || isShowingDeadlineTasks == null) {
+                value = application.getString(R.string.you_have_no_tasks)
+                return
+            }
+
+            val completedCount =
+                if (isShowingDeadlineTasks) tasksCompletionStats.deadlineTasksCompletedCount
+                else tasksCompletionStats.backlogTasksCompletedCount
+
+            val totalCount =
+                if (isShowingDeadlineTasks) tasksCompletionStats.deadlineTasksTotalCount
+                else tasksCompletionStats.backlogTasksTotalCount
+
+            val descriptionStringTemplate = application.getString(R.string.main_you_completed_d_of_d_tasks)
+            value = descriptionStringTemplate.format(completedCount, totalCount)
+        }
+
+        addSource(isShowingDeadlineTasks) { update() }
+        addSource(tasksCompletionStats) { update() }
+
+        update()
+    }
+
 
     fun pickStartTime() = pickStartTimeClickedEvent.call()
     fun pickEndTime() = pickEndTimeClickedEvent.call()
@@ -102,12 +144,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         when (item.itemId){
             R.id.navigation_tasks_with_deadline -> {
                 isShowingDeadlineTasks.value = true
-                updateCurrentCompletedPercentage()
                 return true
             }
             R.id.navigation_backlog_tasks -> {
                 isShowingDeadlineTasks.value = false
-                updateCurrentCompletedPercentage()
                 return true
             }
         }
@@ -128,6 +168,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun reloadTasksWithLoading() {
         isLoading.value = true
         reloadTasksData()
+        reloadStats()
         isLoading.value = false
     }
 
@@ -143,25 +184,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun reloadStats(token: String? = null) {
         val authToken = token ?: getAuthToken()
-        deadlineTasksCompletedPercentage.value = statsService.getCompletedDeadlineTasksStats(
-            authToken, startTimeFilter.value, endTimeFilter.value)
-
-        backlogTasksCompletedPercentage.value = statsService.getCompletedBacklogTasksStats(
-            authToken, filterLabel.value)
-
-        Log.i(TAG, "Stats: " +
-                "deadline - ${deadlineTasksCompletedPercentage.value}, " +
-                "backlog - ${backlogTasksCompletedPercentage.value}")
-
-        updateCurrentCompletedPercentage()
-    }
-
-    private fun updateCurrentCompletedPercentage() {
-        val percentage =
-            if (isShowingDeadlineTasks.value!!) deadlineTasksCompletedPercentage.value!!
-            else backlogTasksCompletedPercentage.value!!
-
-        currentCompletedPercentage.value = (percentage * 100).roundToInt()
+        tasksCompletionStats.value = statsService.getTasksCompletionStats(
+            authToken, startTimeFilter.value, endTimeFilter.value, filterLabel.value)
     }
 
     fun addTask(task: Task) {

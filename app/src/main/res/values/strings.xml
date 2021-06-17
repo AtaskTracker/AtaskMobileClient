@@ -44,5 +44,8 @@
     <string name="title_new_label">Новый лейбл</string>
     <string name="authorization">Авторизация</string>
     <string name="deadline_completed_tasks_header">Сделано</string>
+    <string name="edittask_please_enter_taskname">Укажите название задачи</string>
+    <string name="main_you_completed_d_of_d_tasks">Вы выполнили %d из %d задач!</string>
+    <string name="you_have_no_tasks">У вас нет задач</string>
 
 </resources>
