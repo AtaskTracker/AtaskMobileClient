@@ -113,8 +113,10 @@ class TasksGroupingUtil {
                 groupedBacklogTasks.addAll(group.value.filter { it.dueDate == null })
             }
 
-            groupedBacklogTasks.add(TasksHeader(context.getString(R.string.tasks_header_no_label)))
-            groupedBacklogTasks.addAll(unlabeledTasks)
+            if (unlabeledTasks.any()) {
+                groupedBacklogTasks.add(TasksHeader(context.getString(R.string.tasks_header_no_label)))
+                groupedBacklogTasks.addAll(unlabeledTasks)
+            }
 
             if (!groupedBacklogTasks.any()) {
                 val noTasksHeaderString = context.getString(R.string.task_header_no_tasks)
