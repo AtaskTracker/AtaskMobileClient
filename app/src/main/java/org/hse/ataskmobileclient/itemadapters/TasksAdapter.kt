@@ -96,7 +96,7 @@ class TaskViewHolder(
         cbTaskCompleted.isChecked = taskItem.isCompleted
         tvTaskName.text = taskItem.taskName
         tvTaskLabel.text = taskItem.label ?: ""
-        cbTaskCompleted.setOnCheckedChangeListener { _, _ -> onCheckboxClick(taskItem.id) }
+        cbTaskCompleted.setOnClickListener { onCheckboxClick(taskItem.id) }
         if (taskItem.dueDate != null)
             tvDueDate.text = sdf.format(taskItem.dueDate)
     }
