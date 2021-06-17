@@ -88,7 +88,7 @@ class EditTaskActivity : AppCompatActivity() {
         binding.taskMembersList.adapter = taskMembersAdapter
 
         binding.backButton.setOnClickListener { finishEditingWithoutSaving() }
-        binding.btnSave.setOnClickListener { saveResultsAndFinish() }
+        binding.btnSave.setOnClickListener { validateInputsAndSaveTask() }
 
         viewModel.onUserNotFoundEvent.observe(this, {
             Toast.makeText(this, getString(R.string.user_with_email_not_found), Toast.LENGTH_SHORT).show()
@@ -233,8 +233,14 @@ class EditTaskActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun saveResultsAndFinish() {
+    private fun validateInputsAndSaveTask() {
         val task = viewModel.getEditedTask()
+
+        if (task.taskName.isEmpty()) {
+            val pleaseEnterTaskName = getString(R.string.edittask_please_enter_taskname)
+            Toast.makeText(this, pleaseEnterTaskName, Toast.LENGTH_LONG).show()
+            return
+        }
 
         val statusCode =
             if (oldTask == null) EditTaskStatusCode.ADD
