@@ -117,13 +117,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 return
             }
 
-            val completedCount =
-                if (isShowingDeadlineTasks) tasksCompletionStats.deadlineTasksCompletedCount
-                else tasksCompletionStats.backlogTasksCompletedCount
-
             val totalCount =
                 if (isShowingDeadlineTasks) tasksCompletionStats.deadlineTasksTotalCount
                 else tasksCompletionStats.backlogTasksTotalCount
+
+            if (totalCount == 0) {
+                value = application.getString(R.string.you_have_no_tasks)
+                return
+            }
+
+            val completedCount =
+                if (isShowingDeadlineTasks) tasksCompletionStats.deadlineTasksCompletedCount
+                else tasksCompletionStats.backlogTasksCompletedCount
 
             val descriptionStringTemplate = application.getString(R.string.main_you_completed_d_of_d_tasks)
             value = descriptionStringTemplate.format(completedCount, totalCount)
