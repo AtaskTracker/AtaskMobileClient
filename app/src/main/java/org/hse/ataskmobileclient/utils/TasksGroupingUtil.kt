@@ -89,7 +89,8 @@ class TasksGroupingUtil {
             }
 
             if (!groupedDeadlineTasks.any()) {
-                groupedDeadlineTasks.add(TasksHeader("Задач нет"))
+                val noTasksHeaderString = context.getString(R.string.task_header_no_tasks)
+                groupedDeadlineTasks.add(TasksHeader(noTasksHeaderString))
             }
 
             return groupedDeadlineTasks
@@ -99,15 +100,26 @@ class TasksGroupingUtil {
             val groupedBacklogTasks : ArrayList<TaskListItem> = arrayListOf()
 
             val labelGroups = ungroupedBacklogTasks.groupBy { it.label }
+            val unlabeledTasks : ArrayList<Task> = arrayListOf()
 
             for (group in labelGroups) {
-                val headerString = group.key ?: ":( Нет лейбла"
+                if (group.key == null) {
+                    unlabeledTasks.addAll(group.value.filter { it.dueDate == null})
+                    continue
+                }
+
+                val headerString = group.key!!
                 groupedBacklogTasks.add(TasksHeader(headerString))
                 groupedBacklogTasks.addAll(group.value.filter { it.dueDate == null })
             }
 
-            if (!groupedBacklogTasks.any())
-                groupedBacklogTasks.add(TasksHeader("Задач нет"))
+            groupedBacklogTasks.add(TasksHeader(context.getString(R.string.tasks_header_no_label)))
+            groupedBacklogTasks.addAll(unlabeledTasks)
+
+            if (!groupedBacklogTasks.any()) {
+                val noTasksHeaderString = context.getString(R.string.task_header_no_tasks)
+                groupedBacklogTasks.add(TasksHeader(noTasksHeaderString))
+            }
 
             return groupedBacklogTasks
         }
