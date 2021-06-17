@@ -47,6 +47,8 @@ class SignInActivity : AppCompatActivity() {
 
         binding.loginButton.setOnClickListener { googleSingIn() }
 
+        trySilentSignIn(googleSignInClient)
+
         viewModel.onAuthorizedOnBackendEvent.observe(this, { account ->
             if (account == null){
                 val errorMessage = getString(R.string.could_not_authorize_with_google_on_backend)
@@ -60,6 +62,23 @@ class SignInActivity : AppCompatActivity() {
             }
             startActivity(intent)
         })
+    }
+
+    private fun trySilentSignIn(googleSignInClient: GoogleSignInClient) {
+        val task = googleSignInClient.silentSignIn()
+        val immediateResultAvailable = task.isSuccessful
+        if (immediateResultAvailable) {
+            handleSignInResult(task)
+        }
+        else {
+            viewModel.isLoading.value = true
+            task.addOnCompleteListener {
+                viewModel.isLoading.value = false
+                handleSignInResult(task)
+                // Если не получилось авторизоваться, то мы останемся на этом экране
+                // пользователю придется нажать на кнопку самостоятельно
+            }
+        }
     }
 
     private fun googleSingIn(){
