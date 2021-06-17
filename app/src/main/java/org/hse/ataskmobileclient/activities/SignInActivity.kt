@@ -38,6 +38,8 @@ class SignInActivity : AppCompatActivity() {
         setContentView(R.layout.activity_sign_in)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
+        val noSilentSignIn = intent.getStringExtra(NO_SILENT_SIGN_IN_EXTRA) != null
+
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.server_client_id))
                 .requestEmail()
@@ -47,8 +49,10 @@ class SignInActivity : AppCompatActivity() {
 
         binding.loginButton.setOnClickListener { googleSingIn() }
 
-        trySilentSignIn(googleSignInClient)
+        if (!noSilentSignIn)
+            trySilentSignIn(googleSignInClient)
 
+        googleSignInClient.signOut()
         viewModel.onAuthorizedOnBackendEvent.observe(this, { account ->
             if (account == null){
                 val errorMessage = getString(R.string.could_not_authorize_with_google_on_backend)
@@ -122,5 +126,6 @@ class SignInActivity : AppCompatActivity() {
     companion object {
         const val RC_SIGN_IN = 777
         const val TAG = "SignInActivity"
+        const val NO_SILENT_SIGN_IN_EXTRA = "no_silent_sing_in"
     }
 }

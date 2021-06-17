@@ -2,6 +2,7 @@ package org.hse.ataskmobileclient.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.se.omapi.Session
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +18,7 @@ import org.hse.ataskmobileclient.databinding.ActivityMainBinding
 import org.hse.ataskmobileclient.fragments.DatePickerFragment
 import org.hse.ataskmobileclient.itemadapters.TasksAdapter
 import org.hse.ataskmobileclient.models.Task
+import org.hse.ataskmobileclient.services.SessionManager
 import org.hse.ataskmobileclient.viewmodels.MainViewModel
 
 class MainActivity : AppCompatActivity() {
@@ -62,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.userName = fullName
         viewModel.photoUrl = photoUrlString
 
-        binding.ivMainLogout.setOnClickListener { finish() }
+        binding.ivMainLogout.setOnClickListener { logout() }
         binding.btnAddTask.setOnClickListener { openAddTaskScreen() }
 
         viewModel.pickStartTimeClickedEvent.observe(this, {
@@ -172,6 +174,15 @@ class MainActivity : AppCompatActivity() {
             .create()
 
         dialog.show()
+    }
+
+    private fun logout() {
+        val sessionManager = SessionManager(this)
+        sessionManager.logout()
+        val goToSingInIntent = Intent(this, SignInActivity::class.java).apply {
+            putExtra(SignInActivity.NO_SILENT_SIGN_IN_EXTRA, "dummy")
+        }
+        startActivity(goToSingInIntent)
     }
 
     companion object {

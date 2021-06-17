@@ -42,5 +42,7 @@
     <string name="could_not_authorize_with_google_on_backend">Could not authorize with Google on backend</string>
     <string name="completed_tasks_pb_description">Процент выполненных задач</string>
     <string name="title_new_label">Новый лейбл</string>
+    <string name="authorization">Авторизация</string>
+    <string name="deadline_completed_tasks_header">Сделано</string>
 
 </resources>
