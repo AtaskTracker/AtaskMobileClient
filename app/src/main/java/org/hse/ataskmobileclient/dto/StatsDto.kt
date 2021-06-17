@@ -4,6 +4,9 @@ import com.google.gson.annotations.SerializedName
 
 class StatsDto(
 
-    @SerializedName("percentage")
-    val percentage : Float
+    @SerializedName("total")
+    val total : Int,
+
+    @SerializedName("done")
+    val done: Int,
 )

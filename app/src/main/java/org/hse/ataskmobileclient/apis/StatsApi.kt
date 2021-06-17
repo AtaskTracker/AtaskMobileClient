@@ -45,7 +45,7 @@ class StatsApi(
     private suspend fun requestStatsWithParameters(parameters: List<Pair<String, Any?>>) : StatsDto? {
         val url = Urls().getStatsUrl()
 
-        val (request, response, result) = Fuel
+        val (request, _, result) = Fuel
             .get(url, parameters)
             .header("Authorization" to "Bearer $authToken")
             .awaitStringResponseResult()
@@ -67,6 +67,6 @@ class StatsApi(
     }
 
     companion object {
-        private val TAG = "StatsApi"
+        private const val TAG = "StatsApi"
     }
 }

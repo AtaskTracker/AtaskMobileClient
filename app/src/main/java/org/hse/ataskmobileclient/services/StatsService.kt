@@ -7,11 +7,15 @@ class StatsService : IStatsService {
 
     override suspend fun getCompletedDeadlineTasksStats(authToken : String, startTime: Date?, endTime: Date?): Float? {
         val statsDto = StatsApi(authToken).getCompletedDeadlineTasksStats(startTime, endTime)
-        return statsDto?.percentage
+            ?: return null
+
+        return statsDto.done.toFloat() / statsDto.total
     }
 
     override suspend fun getCompletedBacklogTasksStats(authToken: String, label: String?): Float? {
         val statsDto = StatsApi(authToken).getCompletedBacklogTasksStats(label)
-        return statsDto?.percentage
+            ?: return null
+
+        return statsDto.done.toFloat() / statsDto.total
     }
 }
