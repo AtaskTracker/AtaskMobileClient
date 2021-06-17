@@ -13,7 +13,7 @@ import kotlin.collections.ArrayList
 class TasksGroupingUtil {
 
     companion object {
-        fun getGroupedDeadlineTasks(context : Context, ungroupedDeadlineTasks : ArrayList<Task>) : ArrayList<TaskListItem> {
+        fun getGroupedDeadlineTasks(context : Context, ungroupedDeadlineTasks : List<Task>) : ArrayList<TaskListItem> {
 
             val overdueTasks : ArrayList<TaskListItem> = arrayListOf()
             val todayTasks : ArrayList<TaskListItem> = arrayListOf()
@@ -28,10 +28,12 @@ class TasksGroupingUtil {
 
                 val compareToToday = DateTimeComparer.compareDateOnly(task.dueDate, dueToday)
                 if (compareToToday < 0) {
-                    overdueTasks.add(task)
+                    if (!task.isCompleted)
+                        overdueTasks.add(task)
                     continue
                 }
-                else if (compareToToday == 0) {
+
+                if (compareToToday == 0) {
                     todayTasks.add(task)
                     continue
                 }
@@ -83,7 +85,7 @@ class TasksGroupingUtil {
             return groupedDeadlineTasks
         }
 
-        fun getGroupedBacklogTasks(context : Context, ungroupedBacklogTasks : ArrayList<Task>) : ArrayList<TaskListItem> {
+        fun getGroupedBacklogTasks(context : Context, ungroupedBacklogTasks : List<Task>) : ArrayList<TaskListItem> {
             val groupedBacklogTasks : ArrayList<TaskListItem> = arrayListOf()
 
             val labelGroups = ungroupedBacklogTasks.groupBy { it.label }

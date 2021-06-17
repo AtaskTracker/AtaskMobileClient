@@ -29,9 +29,11 @@ import org.hse.ataskmobileclient.utils.TasksGroupingUtil
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.roundToInt
 
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
+
     private val ungroupedDeadlineTasks : MutableLiveData<ArrayList<Task>> = MutableLiveData(arrayListOf())
     private val ungroupedBacklogTasks : MutableLiveData<ArrayList<Task>> = MutableLiveData(arrayListOf())
     private val startTimeFilter : MutableLiveData<Date?> = MutableLiveData(null)
@@ -87,19 +89,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     var availableLabels : List<String> = listOf()
 
-    private val deadlineTasksCompletedPercentage : MutableLiveData<Float?> = MutableLiveData(null)
-    private val backlogTasksCompletedPercentage : MutableLiveData<Float?> = MutableLiveData(null)
+    private val deadlineTasksCompletedPercentage : MutableLiveData<Float> = MutableLiveData(0f)
+    private val backlogTasksCompletedPercentage : MutableLiveData<Float> = MutableLiveData(0f)
 
-    val currentCompletedPercentage = Transformations
-        .switchMap(deadlineTasksCompletedPercentage) { deadlineTasksCompletedPercentage ->
-            Transformations.map(backlogTasksCompletedPercentage) { backlogTasksCompletedPercentage ->
-                val progressFloat =
-                    if (isShowingDeadlineTasks.value!!) deadlineTasksCompletedPercentage
-                    else backlogTasksCompletedPercentage
-
-                progressFloat?.toInt() ?: 0
-            }
-    }
+    val currentCompletedPercentage : MutableLiveData<Int> = MutableLiveData(0)
 
     fun pickStartTime() = pickStartTimeClickedEvent.call()
     fun pickEndTime() = pickEndTimeClickedEvent.call()
@@ -109,10 +102,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         when (item.itemId){
             R.id.navigation_tasks_with_deadline -> {
                 isShowingDeadlineTasks.value = true
+                updateCurrentCompletedPercentage()
                 return true
             }
             R.id.navigation_backlog_tasks -> {
                 isShowingDeadlineTasks.value = false
+                updateCurrentCompletedPercentage()
                 return true
             }
         }
@@ -144,9 +139,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )
         ungroupedDeadlineTasks.value = ArrayList(allTasks.filter { it.dueDate != null })
         ungroupedBacklogTasks.value = ArrayList(allTasks.filter { it.dueDate == null })
-
-//        val finishedDeadlineCount = ungroupedDeadlineTasks.value!!.filter { it.isCompleted }.size
-//        val finishedBacklogCount = ungroupedBacklogTasks.value!!.filter { it.isCompleted }.size
     }
 
     private suspend fun reloadStats(token: String? = null) {
@@ -160,6 +152,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         Log.i(TAG, "Stats: " +
                 "deadline - ${deadlineTasksCompletedPercentage.value}, " +
                 "backlog - ${backlogTasksCompletedPercentage.value}")
+
+        updateCurrentCompletedPercentage()
+    }
+
+    private fun updateCurrentCompletedPercentage() {
+        val percentage =
+            if (isShowingDeadlineTasks.value!!) deadlineTasksCompletedPercentage.value!!
+            else backlogTasksCompletedPercentage.value!!
+
+        currentCompletedPercentage.value = (percentage * 100).roundToInt()
     }
 
     fun addTask(task: Task) {
@@ -249,6 +251,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun toggleTaskCompletedStatus(taskId : String) {
+        val task = ungroupedBacklogTasks.value!!.firstOrNull { it.id == taskId }
+                    ?: ungroupedDeadlineTasks.value!!.firstOrNull { it.id == taskId }
+
+        if (task != null) {
+            val updatedTask = task.copyWithToggledIsCompletedState()
+            viewModelScope.launch {
+                val authToken = getAuthToken()
+                tasksService.updateTask(authToken, updatedTask)
+                reloadTasksData()
+                reloadStats()
+            }
+        }
+    }
+
     fun getFilterStartTime() = startTimeFilter.value
     fun getFilterEndTime() = endTimeFilter.value
 
@@ -287,7 +304,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     companion object {
-        private val TAG = "MainViewModel"
+        private const val TAG = "MainViewModel"
 
         @JvmStatic
         @BindingAdapter("imageUrl")

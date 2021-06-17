@@ -43,13 +43,16 @@ class MainActivity : AppCompatActivity() {
         viewModel.reloadData()
 
         val deadlineTasks = viewModel.deadlineTasks.value ?: arrayListOf()
-        val deadlineTasksAdapter = TasksAdapter(deadlineTasks, this@MainActivity::openDeadlineTask)
+        val deadlineTasksAdapter = TasksAdapter(deadlineTasks,
+            this@MainActivity::openDeadlineTask, this@MainActivity::toggleTaskStatus)
         viewModel.deadlineTasks.observe(this, { deadlineTasksAdapter.tasks = it })
         binding.deadlineTasksList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         binding.deadlineTasksList.adapter = deadlineTasksAdapter
 
         val backlogTasks = viewModel.backlogTasks.value ?: arrayListOf()
-        val backlogTasksAdapter = TasksAdapter(backlogTasks, this@MainActivity::openBacklogTask)
+        val backlogTasksAdapter = TasksAdapter(backlogTasks,
+            this@MainActivity::openBacklogTask, this@MainActivity::toggleTaskStatus)
+
         viewModel.backlogTasks.observe(this, { backlogTasksAdapter.tasks = it })
         binding.backlogTasksList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         binding.backlogTasksList.adapter = backlogTasksAdapter
@@ -116,6 +119,11 @@ class MainActivity : AppCompatActivity() {
             return
 
         openTaskForEditing(view, clickedTask)
+    }
+
+    private fun toggleTaskStatus(taskId: String?) {
+        if (taskId != null)
+            viewModel.toggleTaskCompletedStatus(taskId)
     }
 
     private fun openTaskForEditing(view : View, task : Task) {

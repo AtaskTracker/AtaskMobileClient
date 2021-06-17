@@ -13,4 +13,9 @@ class Task(
         val label: String? = null,
         var photoUrl: String? = null,
         val photoBase64 : String? = null,
-) : TaskListItem()
+) : TaskListItem() {
+        fun copyWithToggledIsCompletedState() : Task {
+            return Task(id, !isCompleted, taskName, description,
+                    dueDate, members, label, photoUrl, photoBase64)
+        }
+}

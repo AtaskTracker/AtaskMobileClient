@@ -16,7 +16,8 @@ import kotlin.collections.ArrayList
 
 class TasksAdapter(
     tasks : ArrayList<TaskListItem>,
-    private val onListItemClick: (view : View, position: Int) -> Unit
+    private val onListItemClick: (view : View, position: Int) -> Unit,
+    private val onCheckboxClick: (taskId: String?) -> Unit
 )
     : RecyclerView.Adapter<RecyclerView.ViewHolder>()
 {
@@ -32,7 +33,7 @@ class TasksAdapter(
 
         if (viewType == TYPE_SPECIFIC_TASK) {
             val contactView = inflater.inflate(R.layout.task_item, parent, false)
-            return TaskViewHolder(contactView, onListItemClick)
+            return TaskViewHolder(contactView, onListItemClick, onCheckboxClick)
         } else if (viewType == TYPE_TASKS_BLOCK_HEADER) {
             val contactView = inflater.inflate(R.layout.tasks_block_header, parent, false)
             return TasksHeaderViewHolder(contactView, onListItemClick)
@@ -78,7 +79,8 @@ class TasksAdapter(
 
 class TaskViewHolder(
         itemView: View,
-        private val onListItemClick: (view : View, position: Int) -> Unit)
+        private val onListItemClick: (view : View, position: Int) -> Unit,
+        private val onCheckboxClick: (taskId: String?) -> Unit)
     : RecyclerView.ViewHolder(itemView) {
 
     private val cbTaskCompleted : CheckBox = itemView.findViewById(R.id.cb_task)
@@ -94,6 +96,7 @@ class TaskViewHolder(
         cbTaskCompleted.isChecked = taskItem.isCompleted
         tvTaskName.text = taskItem.taskName
         tvTaskLabel.text = taskItem.label ?: ""
+        cbTaskCompleted.setOnCheckedChangeListener { _, _ -> onCheckboxClick(taskItem.id) }
         if (taskItem.dueDate != null)
             tvDueDate.text = sdf.format(taskItem.dueDate)
     }
