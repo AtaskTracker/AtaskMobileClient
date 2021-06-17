@@ -48,7 +48,7 @@ class SignInActivity : AppCompatActivity() {
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
         binding.loginButton.setOnClickListener { googleSingIn() }
-
+        
         if (!noSilentSignIn)
             trySilentSignIn(googleSignInClient)
 

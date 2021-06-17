@@ -149,7 +149,7 @@ class EditTaskActivity : AppCompatActivity() {
                 when (which) {
                     0 -> askUserToTakePhoto()
                     1 -> askUserToSelectPhotoFromGallery()
-                    2 -> viewModel.taskPicture.value = null
+                    2 -> removeTaskPicture()
                     else -> throw NotImplementedError()
                 }
             }
@@ -201,6 +201,11 @@ class EditTaskActivity : AppCompatActivity() {
         val pickPhotoFromGallery = Intent(Intent.ACTION_PICK)
         pickPhotoFromGallery.type = "image/*"
         startActivityForResult(pickPhotoFromGallery, REQUEST_PHOTO_FROM_STORAGE)
+    }
+
+    private fun removeTaskPicture() {
+        viewModel.taskPicture.value = null
+        viewModel.photoUrl.value = null
     }
 
     private fun askDeleteTaskConfirmation() {

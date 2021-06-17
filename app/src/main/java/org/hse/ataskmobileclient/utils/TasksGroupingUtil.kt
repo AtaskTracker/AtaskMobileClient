@@ -48,8 +48,8 @@ class TasksGroupingUtil {
                     upcomingTasks.add(task)
             }
 
-
-            val sdf = SimpleDateFormat("dd MMMM", Locale.getDefault())
+            val locale = context.resources.configuration.locales.get(0)
+            val sdf = SimpleDateFormat("dd MMMM", locale)
             val overdueStringHeaderString = context.getString(R.string.overdue_tasks_header)
             val todayStringHeaderString = context.getString(R.string.today_tasks_header)
             val tomorrowStringHeaderString = context.getString(R.string.tomorrow_tasks_header)

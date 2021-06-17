@@ -63,7 +63,7 @@
             android:layout_height="match_parent"
             tools:context=".fragments.ProgressBarFragment"
             android:visibility="@{viewModel.isLoading ? View.VISIBLE : View.GONE}"
-            tools:visibility="visible"
+            tools:visibility="gone"
             android:background="#CCFFFFFF">
 
             <ProgressBar

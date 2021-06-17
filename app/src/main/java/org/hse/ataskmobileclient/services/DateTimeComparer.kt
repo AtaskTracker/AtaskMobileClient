@@ -16,11 +16,11 @@ class DateTimeComparer {
             firstCal.set(Calendar.MILLISECOND, 0)
             firstCal.set(Calendar.SECOND, 0)
             firstCal.set(Calendar.MINUTE, 0)
-            firstCal.set(Calendar.HOUR, 0)
+            firstCal.set(Calendar.HOUR_OF_DAY, 0)
             secondCal.set(Calendar.MILLISECOND, 0)
             secondCal.set(Calendar.SECOND, 0)
             secondCal.set(Calendar.MINUTE, 0)
-            secondCal.set(Calendar.HOUR, 0)
+            secondCal.set(Calendar.HOUR_OF_DAY, 0)
 
             return firstCal.compareTo(secondCal)
         }
